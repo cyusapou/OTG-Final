@@ -189,6 +189,16 @@ export const translations = {
         startTracking: 'Start Tracking',
         selectLocations: 'Select start and end locations to track journey',
         
+        // Track Page
+        trackYourJourney: 'Track your location and journey',
+        chooseLocation: 'Choose Location',
+        details: 'Details',
+        map: 'Map',
+        journey: 'Journey',
+        refresh: 'Refresh',
+        getLocationFirst: 'Get your location first to view map',
+        getLocationData: 'No location data yet',
+        
         // Location Picker
         currentLocation: 'My Location',
         chooseOnMap: 'Choose on Map',
@@ -393,6 +403,16 @@ export const translations = {
         remaining: 'Harimo',
         startTracking: 'Tangira Gurikirana',
         selectLocations: 'Hitamo aho ugasomeka naho ugagera',
+        
+        // Track Page
+        trackYourJourney: 'Kurikirana inzira yawe',
+        chooseLocation: 'Hitamo Aho',
+        details: 'Ibisobanuro',
+        map: 'Ikarita',
+        journey: 'Rugendo',
+        refresh: 'Kongeranya',
+        getLocationFirst: 'Tuwakurikirana mbere kugira ngo urebe ikarita',
+        getLocationData: 'Nta mahoro y\'aho uherereye',
         
         // Location Picker
         currentLocation: 'Aho Nanjye',
@@ -603,6 +623,16 @@ export const translations = {
         remaining: 'Restant',
         startTracking: 'Commencer le Suivi',
         selectLocations: 'Sélectionnez les lieux de départ et d\'arrivée pour suivre le trajet',
+        
+        // Track Page
+        trackYourJourney: 'Suivez votre trajet',
+        chooseLocation: 'Choisir une Localisation',
+        details: 'Détails',
+        map: 'Carte',
+        journey: 'Trajet',
+        refresh: 'Rafraîchir',
+        getLocationFirst: 'Obtenez d\'abord votre localisation pour afficher la carte',
+        getLocationData: 'Pas de données de localisation pour le moment',
         
         // Location Picker
         currentLocation: 'Ma Localisation',

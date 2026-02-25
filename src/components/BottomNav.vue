@@ -10,9 +10,9 @@
         <i class="fas fa-bus"></i>
         <span>{{ t.express }}</span>
       </div>
-      <div :class="['nav-item', { active: isActive('/routine') }]" @click="goTo('/routine')">
-        <i class="fas fa-bookmark"></i>
-        <span>{{ t.routineTrips }}</span>
+      <div :class="['nav-item', { active: isActive('/track') }]" @click="goTo('/track')">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>{{ t.track }}</span>
       </div>
       <div :class="['nav-item', { active: isActive('/planner') }]" @click="goTo('/planner')">
         <i class="fas fa-calendar-alt"></i>
@@ -80,8 +80,8 @@
         <div class="nav-section">
           <div class="nav-section-title" v-if="sidebarOpen">{{ t.other }}</div>
           <div 
-            :class="['sidebar-item', { active: showLocationModal }]" 
-            @click="openLocationModal"
+            :class="['sidebar-item', { active: isActive('/track') }]" 
+            @click="goTo('/track')"
           >
             <i class="fas fa-map-marker-alt"></i>
             <span v-if="sidebarOpen">{{ t.track }}</span>
@@ -113,7 +113,6 @@ const route = useRoute()
 const currentLang = computed(() => store.currentLang)
 const t = computed(() => translations[currentLang.value])
 const sidebarOpen = computed(() => store.sidebarOpen)
-const showLocationModal = computed(() => store.showLocationModal)
 
 const isActive = (path) => {
   return route.path === path
@@ -125,10 +124,6 @@ const goTo = (path) => {
 
 const toggleSidebar = () => {
   store.sidebarOpen = !store.sidebarOpen
-}
-
-const openLocationModal = () => {
-  store.showLocationModal = true
 }
 </script>
 
