@@ -19,7 +19,7 @@
       >
         <l-popup>
           <div class="route-popup">
-            <h4>🚩 Your Location</h4>
+            <h4><i class="fas fa-map-pin"></i> Your Location</h4>
             <p class="route-coords">{{ startPoint.lat.toFixed(4) }}, {{ startPoint.lng.toFixed(4) }}</p>
             <p v-if="startPoint.accuracy" class="route-accuracy">
               Accuracy: ±{{ Math.round(startPoint.accuracy) }}m
@@ -35,7 +35,7 @@
       >
         <l-popup>
           <div class="route-popup">
-            <h4>🎯 Destination</h4>
+            <h4><i class="fas fa-crosshairs"></i> Destination</h4>
             <p class="station-name">{{ endPoint.name }}</p>
             <p class="station-area">{{ endPoint.area }}</p>
             <p class="route-distance">{{ distance.toFixed(2) }} km away</p>

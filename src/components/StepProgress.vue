@@ -9,7 +9,7 @@
       }]"
     >
       <div class="step-circle">
-        <span v-if="currentStep > index + 1" class="checkmark">✓</span>
+        <span v-if="currentStep > index + 1" class="checkmark"><i class="fas fa-check"></i></span>
         <span v-else>{{ index + 1 }}</span>
       </div>
       <span class="step-label">{{ step }}</span>

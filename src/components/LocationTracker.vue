@@ -124,7 +124,7 @@
             
             <!-- Tracked Coordinates Section -->
             <div v-if="store.coordinates.length > 0" class="coordinates-section">
-              <h3>📍 {{ t.trackedStations || 'Tracked Stations' }}</h3>
+              <h3><i class="fas fa-map-marker-alt"></i> {{ t.trackedStations || 'Tracked Stations' }}</h3>
               <div class="coordinates-list">
                 <div v-for="(coordinate, index) in store.coordinates" :key="index" class="coordinate-item">
                   <div class="coord-icon">

@@ -16,22 +16,24 @@
       </div>
 
       <!-- Payment Options -->
-      <div v-if="!store.showTicket" class="payment-options">
-        <div 
-          v-for="method in paymentMethods" 
-          :key="method.id"
-          :class="['payment-card', { selected: selectedMethod?.id === method.id }]"
-          @click="selectMethod(method)"
-        >
-          <div class="payment-icon">
-            <i :class="method.icon"></i>
-          </div>
-          <div class="payment-info">
-            <span class="payment-name">{{ method.name }}</span>
-            <span class="payment-desc">{{ method.description }}</span>
-          </div>
-          <div v-if="selectedMethod?.id === method.id" class="selected-check">
-            <i class="fas fa-check-circle"></i>
+      <div v-if="!store.showTicket && !store.isProcessing" class="payment-options">
+        <div class="payment-methods-grid">
+          <div 
+            v-for="method in paymentMethods" 
+            :key="method.id"
+            :class="['payment-card', { selected: selectedMethod?.id === method.id }]"
+            @click="selectMethod(method)"
+          >
+            <div class="payment-icon">
+              <i :class="method.icon"></i>
+            </div>
+            <div class="payment-info">
+              <span class="payment-name">{{ method.name }}</span>
+              <span class="payment-desc">{{ method.description }}</span>
+            </div>
+            <div v-if="selectedMethod?.id === method.id" class="selected-check">
+              <i class="fas fa-check-circle"></i>
+            </div>
           </div>
         </div>
 
@@ -45,7 +47,10 @@
               type="tel" 
               placeholder="+250788123456"
               class="form-input"
+              :class="{ 'input-error': momoErrors.phone }"
+              @blur="validateMomoPhone"
             />
+            <span v-if="momoErrors.phone" class="field-error">{{ momoErrors.phone }}</span>
           </div>
           <div class="form-group">
             <label>{{ t.momoPassword || 'MoMo Password' }}</label>
@@ -54,7 +59,10 @@
               type="password" 
               :placeholder="t.enterPassword || 'Enter your MoMo PIN'"
               class="form-input"
+              :class="{ 'input-error': momoErrors.password }"
+              @blur="validateMomoPassword"
             />
+            <span v-if="momoErrors.password" class="field-error">{{ momoErrors.password }}</span>
           </div>
         </div>
 
@@ -78,9 +86,10 @@
               placeholder="1234 5678 9012 3456"
               maxlength="19"
               class="form-input"
+              @input="formatCardNumber"
             />
           </div>
-          <div class="form-row">
+          <div class="form-row-inline">
             <div class="form-group">
               <label>{{ t.expiryDate || 'Expiry Date' }}</label>
               <input 
@@ -89,6 +98,7 @@
                 placeholder="MM/YY"
                 maxlength="5"
                 class="form-input"
+                @input="formatExpiryDate"
               />
             </div>
             <div class="form-group">
@@ -130,14 +140,33 @@
           </div>
         </div>
 
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-row">
+            <span>Route</span>
+            <span>Kigali → {{ store.selectedDestination?.name || '—' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Departure</span>
+            <span>{{ store.selectedTrip?.departure || '—' }}</span>
+          </div>
+          <div class="summary-row total-row">
+            <span>Total</span>
+            <span class="total-amount">RWF {{ store.selectedTrip?.price || 0 }}</span>
+          </div>
+        </div>
+
         <!-- Pay Button -->
         <button 
-          class="btn-primary btn-large btn-pay" 
+          class="btn-pay" 
           @click="processPayment"
           :disabled="!isFormValid()"
         >
-          {{ t.payNow }} RWF {{ store.selectedTrip?.price }}
-          <i class="fas fa-lock"></i>
+          <span class="btn-pay-text">
+            {{ t.payNow }} RWF {{ store.selectedTrip?.price }}
+          </span>
+          <i class="fas fa-lock btn-pay-lock"></i>
         </button>
 
         <!-- Security Note -->
@@ -204,7 +233,7 @@
         </div>
 
         <div class="ticket-buttons">
-          <button class="btn-primary btn-full" @click="downloadTicket">
+          <button class="btn-primary-action btn-full" @click="downloadTicket">
             <i class="fas fa-download"></i>
             {{ t.downloadTicket }}
           </button>
@@ -214,7 +243,7 @@
           </button>
         </div>
 
-        <button class="btn-secondary btn-full" @click="goToLanding">
+        <button class="btn-new-booking btn-full" @click="goToLanding">
           {{ t.newBooking }}
         </button>
       </div>
@@ -223,7 +252,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store/index.js'
 import { translations } from '../translations/index.js'
@@ -270,20 +299,61 @@ const creditCardForm = ref({
   cvv: ''
 })
 
+// Validation errors
+const momoErrors = reactive({
+  phone: '',
+  password: ''
+})
+
+const validateMomoPhone = () => {
+  const phone = mobileMoneyForm.value.phone.replace(/\s/g, '')
+  if (!phone) {
+    momoErrors.phone = 'Phone number is required'
+  } else if (!/^(\+?250|0)?7\d{8}$/.test(phone)) {
+    momoErrors.phone = 'Enter a valid Rwandan phone number'
+  } else {
+    momoErrors.phone = ''
+  }
+}
+
+const validateMomoPassword = () => {
+  if (!mobileMoneyForm.value.password.trim()) {
+    momoErrors.password = 'MoMo PIN is required'
+  } else if (mobileMoneyForm.value.password.length < 4) {
+    momoErrors.password = 'PIN must be at least 4 digits'
+  } else {
+    momoErrors.password = ''
+  }
+}
+
+// Card number formatting
+const formatCardNumber = () => {
+  let value = creditCardForm.value.cardNumber.replace(/\D/g, '')
+  value = value.replace(/(.{4})/g, '$1 ').trim()
+  creditCardForm.value.cardNumber = value.substring(0, 19)
+}
+
+// Expiry date formatting
+const formatExpiryDate = () => {
+  let value = creditCardForm.value.expiryDate.replace(/\D/g, '')
+  if (value.length >= 2) {
+    value = value.substring(0, 2) + '/' + value.substring(2)
+  }
+  creditCardForm.value.expiryDate = value.substring(0, 5)
+}
+
 const isFormValid = () => {
   if (!selectedMethod.value) return false
   
   if (selectedMethod.value.id === 1) {
-    // Mobile Money validation
-    return mobileMoneyForm.value.phone.trim() && mobileMoneyForm.value.password.trim()
+    const phone = mobileMoneyForm.value.phone.replace(/\s/g, '')
+    return /^(\+?250|0)?7\d{8}$/.test(phone) && mobileMoneyForm.value.password.trim().length >= 4
   } else if (selectedMethod.value.id === 2) {
-    // Credit Card validation
     return creditCardForm.value.cardholderName.trim() && 
-           creditCardForm.value.cardNumber.trim() &&
-           creditCardForm.value.expiryDate.trim() &&
-           creditCardForm.value.cvv.trim()
+           creditCardForm.value.cardNumber.replace(/\s/g, '').length >= 13 &&
+           creditCardForm.value.expiryDate.trim().length === 5 &&
+           creditCardForm.value.cvv.trim().length >= 3
   } else if (selectedMethod.value.id === 3) {
-    // On The Go Wallet - requires authentication and sufficient balance
     return isAuthenticated.value && (store.user?.walletBalance || 0) >= (store.selectedTrip?.price || 0)
   }
   
@@ -305,6 +375,9 @@ const goToLanding = () => {
 
 const selectMethod = (method) => {
   selectedMethod.value = method
+  // Clear errors when switching methods
+  momoErrors.phone = ''
+  momoErrors.password = ''
 }
 
 const processPayment = () => {
@@ -319,15 +392,115 @@ const processPayment = () => {
 }
 
 const downloadTicket = () => {
-  alert('Download ticket - connect to backend')
+  // Create a canvas to draw the ticket
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  
+  // Set canvas size (ticket dimensions)
+  canvas.width = 400
+  canvas.height = 600
+  
+  // Background
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  
+  // Header background
+  ctx.fillStyle = '#2E7D32'
+  ctx.fillRect(0, 0, canvas.width, 100)
+  
+  // Header text
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = 'bold 24px Inter, Arial, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('ON THE GO', canvas.width / 2, 40)
+  ctx.font = '14px Inter, Arial, sans-serif'
+  ctx.fillText('Bus Ticket', canvas.width / 2, 60)
+  
+  // Success checkmark
+  ctx.fillStyle = '#4CAF50'
+  ctx.beginPath()
+  ctx.arc(canvas.width / 2, 130, 25, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = 'bold 20px Arial'
+  ctx.fillText('✓', canvas.width / 2, 138)
+  
+  // Success message
+  ctx.fillStyle = '#212121'
+  ctx.font = 'bold 18px Inter, Arial, sans-serif'
+  ctx.fillText('Payment Successful!', canvas.width / 2, 180)
+  ctx.font = '14px Inter, Arial, sans-serif'
+  ctx.fillStyle = '#757575'
+  ctx.fillText('Your booking is confirmed', canvas.width / 2, 200)
+  
+  // Divider
+  ctx.strokeStyle = '#E8E8E8'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(20, 220)
+  ctx.lineTo(canvas.width - 20, 220)
+  ctx.stroke()
+  
+  // Ticket details
+  const drawRow = (label, value, y) => {
+    ctx.fillStyle = '#757575'
+    ctx.font = '12px Inter, Arial, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(label, 30, y)
+    ctx.fillStyle = '#212121'
+    ctx.font = 'bold 14px Inter, Arial, sans-serif'
+    ctx.fillText(value, 30, y + 18)
+  }
+  
+  drawRow('EXPRESS', store.selectedExpress?.name || 'N/A', 240)
+  drawRow('ROUTE', `Kigali → ${store.selectedDestination?.name || 'N/A'}`, 280)
+  drawRow('DEPARTURE', store.selectedTrip?.departure || 'N/A', 320)
+  drawRow('DATE', formatDate(store.selectedDate), 360)
+  drawRow('BUS PLATE', store.selectedTrip?.plate || 'N/A', 400)
+  
+  // Price
+  ctx.fillStyle = '#E8F5E9'
+  ctx.fillRect(20, 440, canvas.width - 40, 50)
+  ctx.fillStyle = '#2E7D32'
+  ctx.font = 'bold 16px Inter, Arial, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('PRICE PAID', canvas.width / 2, 460)
+  ctx.font = 'bold 24px Inter, Arial, sans-serif'
+  ctx.fillText(`RWF ${store.selectedTrip?.price || '0'}`, canvas.width / 2, 480)
+  
+  // Stop code box
+  ctx.strokeStyle = '#2E7D32'
+  ctx.lineWidth = 2
+  ctx.strokeRect(30, 500, canvas.width - 60, 60)
+  ctx.fillStyle = '#757575'
+  ctx.font = '10px Inter, Arial, sans-serif'
+  ctx.fillText('BUS STOP CODE', canvas.width / 2, 520)
+  ctx.fillStyle = '#2E7D32'
+  ctx.font = 'bold 28px Inter, Arial, sans-serif'
+  ctx.fillText(store.stopCode || '----', canvas.width / 2, 545)
+  
+  // Footer
+  ctx.fillStyle = '#757575'
+  ctx.font = '10px Inter, Arial, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('Present this code at the bus stop', canvas.width / 2, 580)
+  
+  // Generate and download
+  const link = document.createElement('a')
+  link.download = `OnTheGo-Ticket-${store.stopCode}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
 }
 
 const shareTicket = () => {
-  alert('Share ticket - connect to backend')
-}
-
-const trackBus = () => {
-  alert('Track bus - connect to backend')
+  if (navigator.share) {
+    navigator.share({
+      title: 'On The Go - Bus Ticket',
+      text: `Bus ticket: Kigali → ${store.selectedDestination?.name}, Departure: ${store.selectedTrip?.departure}, Stop Code: ${store.stopCode}`,
+    }).catch(() => {})
+  } else {
+    alert('Share ticket - connect to backend')
+  }
 }
 
 const formatBalance = (amount) => {
@@ -347,7 +520,6 @@ const formatDate = (dateStr) => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
 .page-wrapper {
   font-family: 'Inter', sans-serif;
@@ -372,8 +544,8 @@ const formatDate = (dateStr) => {
 
 .screen {
   min-height: 100vh;
-  padding: 20px;
-  max-width: 600px;
+  padding: 16px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
@@ -394,7 +566,7 @@ const formatDate = (dateStr) => {
 
 .header h2 {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #212121;
 }
 
@@ -417,6 +589,7 @@ const formatDate = (dateStr) => {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .btn-back:hover {
@@ -424,39 +597,43 @@ const formatDate = (dateStr) => {
   color: #2E7D32;
 }
 
-.payment-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+/* ============================================
+   PAYMENT METHODS GRID
+   ============================================ */
+.payment-methods-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .payment-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px 16px;
+  gap: 14px;
+  padding: 16px;
   background: #FFF;
   border-radius: 12px;
   border: 2px solid #E8E8E8;
   cursor: pointer;
   transition: all 0.2s;
-  text-align: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .payment-card:hover {
   border-color: #BDBDBD;
+  background: #FAFAFA;
 }
 
 .payment-card.selected {
   border-color: #2E7D32;
   background: #F1F8E9;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
 }
 
 .payment-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: #E8F5E9;
   border-radius: 10px;
   display: flex;
@@ -467,11 +644,12 @@ const formatDate = (dateStr) => {
 
 .payment-icon i {
   color: #2E7D32;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .payment-info {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .payment-name {
@@ -483,6 +661,7 @@ const formatDate = (dateStr) => {
 }
 
 .payment-desc {
+  display: block;
   font-size: 12px;
   color: #757575;
 }
@@ -490,15 +669,61 @@ const formatDate = (dateStr) => {
 .selected-check {
   color: #2E7D32;
   font-size: 20px;
+  flex-shrink: 0;
 }
 
-/* Payment Form Styles */
+/* Tablet: 3-column grid for payment methods */
+@media (min-width: 600px) {
+  .payment-methods-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .payment-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 14px;
+    gap: 10px;
+  }
+
+  .payment-info {
+    text-align: center;
+  }
+
+  .selected-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  .payment-card {
+    position: relative;
+  }
+}
+
+/* ============================================
+   PAYMENT FORM STYLES
+   ============================================ */
 .payment-form {
   background: #FFF;
   border-radius: 12px;
   padding: 20px;
-  margin-top: 16px;
+  margin-bottom: 20px;
   border: 1px solid #E8E8E8;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .payment-form h3 {
@@ -512,6 +737,10 @@ const formatDate = (dateStr) => {
   margin-bottom: 16px;
 }
 
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
 .form-group label {
   display: block;
   font-size: 13px;
@@ -523,12 +752,13 @@ const formatDate = (dateStr) => {
 .form-input {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #E8E8E8;
+  border: 1.5px solid #E8E8E8;
   border-radius: 8px;
   font-size: 14px;
   color: #212121;
   background: #FFF;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -541,18 +771,84 @@ const formatDate = (dateStr) => {
   color: #BDBDBD;
 }
 
-.form-row {
+.form-input.input-error {
+  border-color: #D32F2F;
+}
+
+.form-input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.field-error {
+  display: block;
+  color: #D32F2F;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.form-row-inline {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* Authentication Warning */
+/* ============================================
+   ORDER SUMMARY
+   ============================================ */
+.order-summary {
+  background: #FFF;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid #E8E8E8;
+}
+
+.order-summary h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212121;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: #616161;
+  border-bottom: 1px solid #F5F5F5;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row.total-row {
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 2px solid #E8E8E8;
+  border-bottom: none;
+  font-weight: 700;
+  color: #212121;
+}
+
+.total-amount {
+  color: #2E7D32;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ============================================
+   AUTHENTICATION WARNING
+   ============================================ */
 .auth-warning {
   background: #FFF3E0;
   border: 1px solid #FFB74D;
   border-radius: 12px;
-  padding: 20px;
+  padding: 18px;
   display: flex;
   gap: 14px;
   margin-bottom: 16px;
@@ -605,7 +901,9 @@ const formatDate = (dateStr) => {
   background: #E65100;
 }
 
-/* Wallet Info */
+/* ============================================
+   WALLET INFO
+   ============================================ */
 .wallet-info {
   background: #E8F5E9;
   border-radius: 12px;
@@ -649,41 +947,53 @@ const formatDate = (dateStr) => {
   color: #D32F2F;
 }
 
-.btn-primary {
-  background: #2E7D32;
-  color: #FFF;
-  border: none;
-  padding: 16px 36px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s;
-  margin-top: 24px;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #1B5E20;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
-}
-
-.btn-primary:disabled {
-  background: #BDBDBD;
-  cursor: not-allowed;
-}
-
-.btn-large {
-  padding: 18px 40px;
-  font-size: 17px;
-}
-
+/* ============================================
+   PAY BUTTON
+   ============================================ */
 .btn-pay {
   width: 100%;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  color: #FFF;
+  border: none;
+  padding: 18px 36px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+  margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-pay:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(46, 125, 50, 0.4);
+}
+
+.btn-pay:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-pay:disabled {
+  background: #BDBDBD;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-pay-text {
+  flex: 1;
+  text-align: center;
+}
+
+.btn-pay-lock {
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 .security-note {
@@ -691,14 +1001,19 @@ const formatDate = (dateStr) => {
   font-size: 12px;
   color: #757575;
   margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .security-note i {
   color: #2E7D32;
-  margin-right: 6px;
 }
 
-/* Loading */
+/* ============================================
+   LOADING
+   ============================================ */
 .loading {
   display: flex;
   flex-direction: column;
@@ -733,10 +1048,24 @@ const formatDate = (dateStr) => {
   color: #757575 !important;
 }
 
-/* Ticket View */
+/* ============================================
+   TICKET VIEW
+   ============================================ */
 .ticket-view {
-  max-width: 400px;
+  max-width: 420px;
   margin: 0 auto;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .success-box {
@@ -747,12 +1076,20 @@ const formatDate = (dateStr) => {
 .checkmark {
   width: 72px;
   height: 72px;
-  background: #2E7D32;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 16px;
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+  animation: checkPop 0.5s ease 0.2s both;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .checkmark i {
@@ -778,7 +1115,7 @@ const formatDate = (dateStr) => {
   padding: 24px;
   border: 1px solid #E8E8E8;
   margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
 .qr-box {
@@ -824,7 +1161,7 @@ const formatDate = (dateStr) => {
 }
 
 .text-green {
-  color: #2E7D32;
+  color: #2E7D32 !important;
   font-weight: 700 !important;
 }
 
@@ -840,6 +1177,8 @@ const formatDate = (dateStr) => {
   font-size: 12px;
   color: #757575;
   margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .code-value {
@@ -858,11 +1197,36 @@ const formatDate = (dateStr) => {
   line-height: 1.4;
 }
 
+/* ============================================
+   TICKET BUTTONS
+   ============================================ */
 .ticket-buttons {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+.btn-primary-action {
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  color: #FFF;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+}
+
+.btn-primary-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.3);
 }
 
 .btn-outline {
@@ -885,7 +1249,7 @@ const formatDate = (dateStr) => {
   background: #E8F5E9;
 }
 
-.btn-secondary {
+.btn-new-booking {
   background: #1976D2;
   color: #FFF;
   border: none;
@@ -901,8 +1265,9 @@ const formatDate = (dateStr) => {
   transition: all 0.2s;
 }
 
-.btn-secondary:hover {
+.btn-new-booking:hover {
   background: #1565C0;
+  transform: translateY(-2px);
 }
 
 .btn-full {
@@ -910,7 +1275,22 @@ const formatDate = (dateStr) => {
   justify-content: center;
 }
 
-/* Mobile adjustments */
+/* ============================================
+   TABLET (>= 600px)
+   ============================================ */
+@media (min-width: 600px) {
+  .ticket-buttons {
+    flex-direction: row;
+  }
+
+  .ticket-buttons .btn-full {
+    flex: 1;
+  }
+}
+
+/* ============================================
+   MOBILE ADJUSTMENTS
+   ============================================ */
 @media (max-width: 600px) {
   .mobile-lang-toggle {
     position: fixed;
@@ -918,20 +1298,11 @@ const formatDate = (dateStr) => {
     right: 12px;
     z-index: 100;
   }
-  
-  .payment-options {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
-/* Smaller screens - stack payment options */
-@media (max-width: 500px) {
-  .payment-options {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Bottom nav spacing on mobile */
+/* ============================================
+   BOTTOM NAV SPACING ON MOBILE
+   ============================================ */
 @media (max-width: 1023px) {
   .page-wrapper {
     padding-bottom: 70px;

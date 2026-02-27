@@ -45,7 +45,7 @@
         >
           <l-popup>
             <div class="user-popup">
-              <h4>📍 Your Location</h4>
+              <h4><i class="fas fa-map-marker-alt"></i> Your Location</h4>
               <p class="user-coords">{{ userLocation.lat.toFixed(4) }}, {{ userLocation.lng.toFixed(4) }}</p>
               <p v-if="userLocation.accuracy" class="user-accuracy">
                 Accuracy: ±{{ Math.round(userLocation.accuracy) }}m
@@ -68,7 +68,7 @@
             v-model="searchQuery"
             @input="handleSearch"
             type="text"
-            placeholder="🔍 Search for a station..."
+            placeholder="Search for a station..."
             class="search-input"
           />
           <button
@@ -76,7 +76,7 @@
             @click="clearSearch"
             class="clear-search-btn"
           >
-            ✕
+            <i class="fas fa-times"></i>
           </button>
         </div>
         
@@ -93,7 +93,7 @@
               <p>{{ station.area }} • {{ station.description }}</p>
             </div>
             <button class="go-to-station-btn">
-              📍
+              <i class="fas fa-map-marker-alt"></i>
             </button>
           </div>
         </div>
@@ -106,85 +106,89 @@
       <div class="controls">
         <!-- Real-time Tracking Status -->
         <div v-if="isTracking" class="tracking-status">
-          <span class="tracking-indicator">🟢</span>
+          <span class="tracking-indicator"><i class="fas fa-circle" style="color: #28a745;"></i></span>
           <span class="tracking-text">Live Tracking ({{ routeDistance.toFixed(2) }}km to destination)</span>
         </div>
 
-        <!-- Find Nearest Station Button -->
-        <button
-          class="control-btn nearest-btn"
-          @click="handleFindNearestStation"
-          :disabled="nearestLoading"
-        >
-          <span v-if="!nearestLoading">📍 Find Nearest Station</span>
-          <span v-else>🔄 Finding...</span>
-        </button>
+        <!-- Button Grid -->
+        <div class="button-grid">
+          <!-- Find Nearest Station Button -->
+          <button
+            class="control-btn nearest-btn"
+            @click="handleFindNearestStation"
+            :disabled="nearestLoading"
+          >
+            <span v-if="!nearestLoading"><i class="fas fa-map-marker-alt"></i> Find Station</span>
+            <span v-else><i class="fas fa-spinner fa-spin"></i> Finding...</span>
+          </button>
 
-        <!-- Center on User Location -->
-        <button
-          v-if="userLocation"
-          class="control-btn center-btn"
-          @click="centerOnUser"
-        >
-          🎯 Center on Me
-        </button>
+          <!-- Center on User Location -->
+          <button
+            v-if="userLocation"
+            class="control-btn center-btn"
+            @click="centerOnUser"
+          >
+            <i class="fas fa-crosshairs"></i> Center
+          </button>
 
-        <!-- Clear Route Button -->
-        <button
-          v-if="showRoute"
-          class="control-btn clear-route-btn"
-          @click="clearRoute"
-        >
-          🗑️ Clear Route
-        </button>
+          <!-- Clear Route Button -->
+          <button
+            v-if="showRoute"
+            class="control-btn clear-route-btn"
+            @click="clearRoute"
+          >
+            <i class="fas fa-trash-alt"></i> Clear
+          </button>
 
-        <!-- Toggle Bus Simulation -->
-        <button
-          class="control-btn simulation-btn"
-          @click="toggleSimulation"
-          :class="{ active: enableSimulation }"
-        >
-          {{ enableSimulation ? '⏸️ Pause Buses' : '▶️ Resume Buses' }}
-        </button>
+          <!-- Toggle Bus Simulation -->
+          <button
+            class="control-btn simulation-btn"
+            @click="toggleSimulation"
+            :class="{ active: enableSimulation }"
+          >
+            <i :class="enableSimulation ? 'fas fa-pause' : 'fas fa-play'"></i>
+            {{ enableSimulation ? 'Pause' : 'Resume' }}
+          </button>
 
-        <!-- Reset View -->
-        <button
-          class="control-btn reset-btn"
-          @click="resetView"
-        >
-          🔄 Reset View
-        </button>
+          <!-- Reset View -->
+          <button
+            class="control-btn reset-btn"
+            @click="resetView"
+          >
+            <i class="fas fa-sync-alt"></i> Reset
+          </button>
+        </div>
       </div>
 
       <!-- Info Display -->
       <div v-if="nearestResult" class="info-display">
         <div class="nearest-info" :class="{ error: nearestResult.error }">
-          <h4>📍 Nearest Station Result</h4>
+          <h4><i class="fas fa-map-marker-alt"></i> Nearest Station Result</h4>
           <div v-if="nearestResult.station && !nearestResult.error">
             <p class="station-name">{{ nearestResult.station.name }}</p>
             <p class="station-distance">{{ nearestResult.distance.toFixed(2) }} km away</p>
             <p class="station-area" v-if="nearestResult.station.area">
-              📍 {{ nearestResult.station.area }}
+              <i class="fas fa-map-marker-alt"></i> {{ nearestResult.station.area }}
             </p>
             <button
               class="zoom-to-btn"
               @click="handleZoomToStation(nearestResult.station)"
             >
-              📍 Zoom to Station
+              <i class="fas fa-search-location"></i> Zoom to Station
             </button>
           </div>
           <div v-else-if="nearestResult.error">
-            <p class="error-message">❌ {{ nearestResult.error }}</p>
+            <p class="error-message"><i class="fas fa-exclamation-circle"></i> {{ nearestResult.error }}</p>
           </div>
         </div>
       </div>
 
       <!-- Selected Station Info -->
       <div v-if="selectedStation" class="selected-station">
-        <h4>🚏 Selected Station</h4>
+        <h4><i class="fas fa-bus"></i> Selected Station</h4>
         <p class="station-name">{{ selectedStation.name }}</p>
         <p class="station-type">{{ selectedStation.type === 'station' ? 'Bus Station' : 'Bus Stop' }}</p>
-        <p v-if="selectedStation.area" class="station-area">📍 {{ selectedStation.area }}</p>
+        <p v-if="selectedStation.area" class="station-area"><i class="fas fa-map-marker-alt"></i> {{ selectedStation.area }}</p>
       </div>
     </div>
   </div>
@@ -587,6 +591,22 @@ defineExpose({
   gap: 12px;
 }
 
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.button-grid .control-btn {
+  justify-content: center;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.button-grid .control-btn i {
+  font-size: 12px;
+}
+
 .tracking-status {
   display: flex;
   align-items: center;
@@ -615,24 +635,31 @@ defineExpose({
 }
 
 .control-btn {
-  padding: 8px 16px;
+  padding: 10px 18px;
   border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   color: #495057;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .control-btn:hover:not(:disabled) {
   background: #e9ecef;
   border-color: #adb5bd;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.control-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .control-btn:disabled {
@@ -644,39 +671,46 @@ defineExpose({
   background: #2E7D32;
   color: white;
   border-color: #2E7D32;
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
 }
 
 .nearest-btn:hover:not(:disabled) {
   background: #1B5E20;
   border-color: #1B5E20;
+  box-shadow: 0 4px 8px rgba(46, 125, 50, 0.4);
 }
 
 .center-btn {
   background: #1976D2;
   color: white;
   border-color: #1976D2;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
 }
 
 .center-btn:hover:not(:disabled) {
   background: #1565C0;
   border-color: #1565C0;
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.4);
 }
 
 .simulation-btn.active {
   background: #FF6F00;
   color: white;
   border-color: #FF6F00;
+  box-shadow: 0 2px 4px rgba(255, 111, 0, 0.3);
 }
 
 .reset-btn {
   background: #6c757d;
   color: white;
   border-color: #6c757d;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
 }
 
 .reset-btn:hover:not(:disabled) {
   background: #5a6268;
   border-color: #5a6268;
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
 }
 
 .clear-route-btn {
@@ -789,8 +823,23 @@ defineExpose({
     align-items: stretch;
   }
   
+  .button-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .button-grid .control-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  
   .control-btn {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -805,11 +854,37 @@ defineExpose({
     background: #4a5568;
     color: #e2e8f0;
     border-color: #718096;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
   
   .control-btn:hover:not(:disabled) {
     background: #718096;
     border-color: #a0aec0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nearest-btn {
+    background: #38a169;
+    border-color: #38a169;
+    box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+  }
+  
+  .nearest-btn:hover:not(:disabled) {
+    background: #2f855a;
+    border-color: #2f855a;
+    box-shadow: 0 4px 8px rgba(56, 161, 105, 0.4);
+  }
+  
+  .center-btn {
+    background: #3182ce;
+    border-color: #3182ce;
+    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+  }
+  
+  .center-btn:hover:not(:disabled) {
+    background: #2b6cb0;
+    border-color: #2b6cb0;
+    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.4);
   }
   
   .info-display {

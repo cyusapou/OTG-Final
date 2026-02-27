@@ -3,7 +3,7 @@
     <div class="container">
       <!-- Header -->
       <header class="page-header">
-        <h1>📋 My Recent Bookings</h1>
+        <h1><i class="fas fa-clipboard-list"></i> My Recent Bookings</h1>
         <p>View and manage your recent bus bookings</p>
       </header>
 
@@ -174,7 +174,7 @@
         <!-- Empty State -->
         <section v-else class="empty-state">
           <div class="empty-content">
-            <div class="empty-icon">📋</div>
+            <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
             <h3>No Bookings Found</h3>
             <p>Try adjusting your search filters or make a new booking to see your reservations here.</p>
             <button @click="goToBooking" class="btn btn-primary">

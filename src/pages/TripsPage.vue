@@ -300,12 +300,12 @@ const filteredTrips = computed(() => {
 })
 
 const goToExpress = () => {
-  router.push('/express')
+  router.push('/destination')
 }
 
 const selectTrip = (trip) => {
   store.selectedTrip = trip
-  router.push('/destination')
+  router.push('/summary')
 }
 </script>
 

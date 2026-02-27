@@ -13,12 +13,12 @@
           <div class="station-popup">
             <h4>{{ station.name }}</h4>
             <p class="station-type">{{ station.type === 'station' ? 'Bus Station' : 'Bus Stop' }}</p>
-            <p v-if="station.area" class="station-area">📍 {{ station.area }}</p>
+            <p v-if="station.area" class="station-area"><i class="fas fa-map-marker-alt"></i> {{ station.area }}</p>
             <button 
               class="zoom-btn"
               @click="zoomToStation(station)"
             >
-              📍 Zoom to Station
+              <i class="fas fa-search-location"></i> Zoom to Station
             </button>
           </div>
         </l-popup>

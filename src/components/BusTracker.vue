@@ -10,7 +10,7 @@
       >
         <l-popup>
           <div class="bus-popup">
-            <h4>🚌 Bus {{ bus.id }}</h4>
+            <h4><i class="fas fa-bus"></i> Bus {{ bus.id }}</h4>
             <p class="bus-route">Route: {{ bus.route || 'Unknown' }}</p>
             <p class="bus-speed">Speed: {{ bus.speed || 0 }} km/h</p>
             <p class="bus-status">Status: {{ bus.status || 'Active' }}</p>
@@ -19,7 +19,7 @@
               class="track-btn"
               @click="handleTrackBus(bus)"
             >
-              📍 Track This Bus
+              <i class="fas fa-map-marker-alt"></i> Track This Bus
             </button>
           </div>
         </l-popup>
@@ -34,7 +34,7 @@
     >
       <l-popup>
         <div class="user-popup">
-          <h4>📍 Your Location</h4>
+          <h4><i class="fas fa-map-marker-alt"></i> Your Location</h4>
           <p class="user-coords">{{ userLocation.lat.toFixed(4) }}, {{ userLocation.lng.toFixed(4) }}</p>
           <p v-if="userLocation.accuracy" class="user-accuracy">
             Accuracy: ±{{ Math.round(userLocation.accuracy) }}m

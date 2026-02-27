@@ -351,7 +351,7 @@ const goBack = () => {
 }
 
 const goToSummary = () => {
-  router.push('/summary')
+  router.push('/trips')
 }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
   <div class="bus-map-example">
-    <h2>🚌 Bus Map Feature - Usage Example</h2>
+    <h2><i class="fas fa-bus"></i> Bus Map Feature - Usage Example</h2>
     <p>This is a simple example of how to use the BusMapFeature component:</p>
     
     <!-- Basic Usage -->
@@ -35,20 +35,20 @@ const findNearest = () => {
 
     <!-- Features -->
     <div class="example-section">
-      <h3>🚀 Features</h3>
+      <h3><i class="fas fa-rocket"></i> Features</h3>
       <ul>
-        <li>📍 <strong>Find Nearest Station</strong>: Uses browser geolocation + Turf.js for accurate distance calculations</li>
-        <li>🗺️ <strong>Interactive Map</strong>: OpenStreetMap tiles with Leaflet (completely free)</li>
-        <li>🚌 <strong>Real-time Bus Tracking</strong>: Simulated bus positions with live updates</li>
-        <li>🎯 <strong>Station Markers</strong>: Clickable markers with popups and zoom functionality</li>
-        <li>📱 <strong>Mobile Responsive</strong>: Works perfectly on mobile devices</li>
-        <li>🌍 <strong>Kigali-focused</strong>: Pre-loaded with real Kigali bus stations</li>
+        <li><i class="fas fa-map-marker-alt"></i> <strong>Find Nearest Station</strong>: Uses browser geolocation + Turf.js for accurate distance calculations</li>
+        <li><i class="fas fa-map"></i> <strong>Interactive Map</strong>: OpenStreetMap tiles with Leaflet (completely free)</li>
+        <li><i class="fas fa-bus"></i> <strong>Real-time Bus Tracking</strong>: Simulated bus positions with live updates</li>
+        <li><i class="fas fa-crosshairs"></i> <strong>Station Markers</strong>: Clickable markers with popups and zoom functionality</li>
+        <li><i class="fas fa-mobile-alt"></i> <strong>Mobile Responsive</strong>: Works perfectly on mobile devices</li>
+        <li><i class="fas fa-globe-africa"></i> <strong>Kigali-focused</strong>: Pre-loaded with real Kigali bus stations</li>
       </ul>
     </div>
 
     <!-- Installation -->
     <div class="example-section">
-      <h3>📦 Installation</h3>
+      <h3><i class="fas fa-box"></i> Installation</h3>
       <pre><code>npm install leaflet @vue-leaflet/vue-leaflet @turf/turf</code></pre>
       
       <p>Add to main.js:</p>
