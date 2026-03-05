@@ -2,7 +2,7 @@
   <div class="nearest-stop-card">
     <div class="card-header">
       <span v-if="stop.isGoogleVerified" class="verified-badge">
-        📍 Google Maps Verified
+         Google Maps Verified
       </span>
     </div>
 

@@ -303,4 +303,97 @@ router.put('/profile', asyncHandler(async (req, res) => {
   });
 }));
 
+/**
+ * Admin/Driver Login endpoint for role-based dashboards
+ * Authenticates users by email, password, and optional role
+ */
+router.post('/admin-login', asyncHandler(async (req, res) => {
+  const { email, password, role } = req.body;
+
+  // Validate required fields
+  validateRequired(req.body, ['email', 'password']);
+  validateEmail(email);
+
+  // Mock authentication for admin/driver roles
+  // In production, consult actual user database
+  const mockUsers = {
+    Driver: {
+      id: 'DRV001',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'driver@test.com',
+      role: 'Driver',
+      expressId: 'EXP001',
+      status: 'active'
+    },
+    Manager: {
+      id: 'MGR001',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      email: 'manager@test.com',
+      role: 'Manager',
+      expressId: 'EXP001',
+      status: 'active'
+    },
+    Admin: {
+      id: 'ADM001',
+      firstName: 'Alice',
+      lastName: 'Johnson',
+      email: 'admin@test.com',
+      role: 'Admin',
+      expressId: 'EXP001',
+      status: 'active'
+    },
+    SuperAdmin: {
+      id: 'SPA001',
+      firstName: 'Bob',
+      lastName: 'Wilson',
+      email: 'rura@test.com',
+      role: 'SuperAdmin',
+      status: 'active'
+    }
+  };
+
+  const selectedRole = role || 'Driver';
+  const user = mockUsers[selectedRole];
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      error: 'INVALID_ROLE',
+      message: 'Invalid role'
+    });
+  }
+
+  // In production: verify email/password against database
+  // For testing: accept any password
+  if (!email) {
+    return res.status(401).json({
+      success: false,
+      error: 'INVALID_CREDENTIALS',
+      message: 'Invalid email or password'
+    });
+  }
+
+  // Generate mock token
+  const token = Buffer.from(JSON.stringify(user)).toString('base64');
+
+  // Log audit
+  addAuditLog({
+    action: 'ADMIN_LOGIN',
+    entityType: 'adminUser',
+    entityId: user.id,
+    actorId: user.id,
+    actorRole: user.role,
+    details: { email, role: selectedRole }
+  });
+
+  res.json({
+    success: true,
+    token,
+    user,
+    role: selectedRole
+  });
+}));
+
 module.exports = router;

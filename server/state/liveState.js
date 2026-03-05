@@ -9,6 +9,7 @@
 
 const config = require('../config');
 const { readCollection } = require('../db/fileStore');
+const { nanoid } = require('nanoid');
 
 // Main state object - mirrors the JSON file structure
 const state = {
@@ -183,7 +184,7 @@ const filterCollection = (collectionName, predicate) => {
  */
 const addAuditLog = (auditEntry) => {
   const entry = {
-    id: require('nanoid')(),
+    id: nanoid(),
     timestamp: new Date().toISOString(),
     ...auditEntry
   };
@@ -191,7 +192,7 @@ const addAuditLog = (auditEntry) => {
   state.auditLog.push(entry);
   markDirty('auditLog');
   
-  console.log(`[fas fa-clipboard-list] Audit log: ${entry.action} by ${entry.actorRole} on ${entry.entityType}`);
+  console.log(`[fas fa-clipboard-list] Audit log: ${entry.action} ${entry.actorRole ? 'by ' + entry.actorRole : ''} on ${entry.entityType}`);
 };
 
 /**

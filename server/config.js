@@ -30,7 +30,7 @@ module.exports = {
   
   // CORS Configuration
   CORS_ORIGINS: {
-    development: ['http://localhost:5173', 'http://localhost:3001'],
+    development: ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
     production: ['https://onthego.rw'] // Add your production domain
   },
   

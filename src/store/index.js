@@ -256,5 +256,18 @@ export const store = reactive({
     this.showTicket = false
     this.isProcessing = false
     this.stopCode = ''
+  },
+  
+  // Admin state
+  userRole: null, // Driver, Manager, Admin, SuperAdmin
+  
+  // Logout function
+  logout() {
+    this.user = null
+    this.token = null
+    this.userRole = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('userRole')
   }
 })
