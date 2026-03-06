@@ -6,6 +6,9 @@
       </button>
       <h1>{{ t.myAccount || 'My Account' }}</h1>
       <div class="spacer"></div>
+      <button class="notification-menu-btn" @click="showNotificationsModal = true" :title="t.notifications || 'Notifications'">
+        <i class="fas fa-bell"></i>
+      </button>
     </div>
 
     <!-- User Profile Card -->
@@ -86,7 +89,7 @@
       <h3>{{ t.settings || 'Settings' }}</h3>
 
       <div class="settings-options">
-        <button class="settings-option">
+        <button class="settings-option" @click="showNotificationsModal = true">
           <div class="option-icon">
             <i class="fas fa-bell"></i>
           </div>
@@ -108,7 +111,7 @@
           <i class="fas fa-chevron-right"></i>
         </button>
 
-        <button class="settings-option">
+        <button class="settings-option" @click="showLanguageModal = true">
           <div class="option-icon">
             <i class="fas fa-globe"></i>
           </div>
@@ -413,6 +416,175 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Notifications Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showNotificationsModal"
+        class="modal-overlay"
+        @click.self="showNotificationsModal = false"
+      >
+        <div class="modal-content notifications-modal">
+          <div class="modal-header">
+            <h2>{{ t.notifications || 'Notifications' }}</h2>
+            <button class="close-btn" @click="showNotificationsModal = false">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <p class="instruction">
+              {{ t.manageNotifications || 'Manage notification preferences' }}
+            </p>
+
+            <div class="notification-options">
+              <div class="notification-item">
+                <label class="toggle-label">
+                  <input type="checkbox" v-model="notifications.driver" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">{{ t.driverNotifications || 'Bus Driver Notifications' }}</span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <label class="toggle-label">
+                  <input type="checkbox" v-model="notifications.email" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">{{ t.emailNotifications || 'Email Notifications' }}</span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <label class="toggle-label">
+                  <input type="checkbox" v-model="notifications.push" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">{{ t.pushNotifications || 'Push Notifications' }}</span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <label class="toggle-label">
+                  <input type="checkbox" v-model="notifications.sms" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">{{ t.smsNotifications || 'SMS Notifications' }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Sample Notifications -->
+            <div class="sample-notifications">
+              <h4>{{ t.sampleNotifications || 'Sample Notifications' }}</h4>
+              <div class="sample-list">
+                <div class="sample-item">
+                  <div class="sample-icon">
+                    <i class="fas fa-bus"></i>
+                  </div>
+                  <div class="sample-content">
+                    <p class="sample-title">{{ t.busArriving || 'Bus Arriving' }}</p>
+                    <p class="sample-desc">{{ t.busArrivingDesc || 'Your bus is 5 minutes away from your stop' }}</p>
+                    <span class="sample-time">2 min ago</span>
+                  </div>
+                </div>
+
+                <div class="sample-item">
+                  <div class="sample-icon">
+                    <i class="fas fa-route"></i>
+                  </div>
+                  <div class="sample-content">
+                    <p class="sample-title">{{ t.routeChange || 'Route Change' }}</p>
+                    <p class="sample-desc">{{ t.routeChangeDesc || 'Your bus route has been updated due to traffic' }}</p>
+                    <span class="sample-time">15 min ago</span>
+                  </div>
+                </div>
+
+                <div class="sample-item">
+                  <div class="sample-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </div>
+                  <div class="sample-content">
+                    <p class="sample-title">{{ t.delayAlert || 'Delay Alert' }}</p>
+                    <p class="sample-desc">{{ t.delayAlertDesc || 'Your bus is delayed by 10 minutes' }}</p>
+                    <span class="sample-time">30 min ago</span>
+                  </div>
+                </div>
+
+                <div class="sample-item">
+                  <div class="sample-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div class="sample-content">
+                    <p class="sample-title">{{ t.stopReminder || 'Stop Reminder' }}</p>
+                    <p class="sample-desc">{{ t.stopReminderDesc || 'Get ready! Your bus is approaching your stop' }}</p>
+                    <span class="sample-time">1 hour ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              class="btn-cancel"
+              @click="showNotificationsModal = false"
+            >
+              {{ t.cancel || 'Cancel' }}
+            </button>
+            <button
+              class="btn-confirm"
+              @click="saveNotifications"
+            >
+              {{ t.save || 'Save' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Language Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showLanguageModal"
+        class="modal-overlay"
+        @click.self="showLanguageModal = false"
+      >
+        <div class="modal-content language-modal">
+          <div class="modal-header">
+            <h2>{{ t.language || 'Language' }}</h2>
+            <button class="close-btn" @click="showLanguageModal = false">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <p class="instruction">
+              {{ t.currentLanguage || 'Choose your language' }}
+            </p>
+
+            <div class="language-options">
+              <button
+                v-for="lang in languages"
+                :key="lang.code"
+                @click="selectLanguage(lang.code)"
+                :class="{ active: currentLang === lang.code }"
+                class="language-btn"
+              >
+                <span class="flag">{{ lang.flag }}</span>
+                <span class="name">{{ lang.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              class="btn-cancel"
+              @click="showLanguageModal = false"
+            >
+              {{ t.cancel || 'Cancel' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -439,6 +611,8 @@ const showDepositModal = ref(false)
 const showWithdrawModal = ref(false)
 const showEditModal = ref(false)
 const showChangePasswordModal = ref(false)
+const showNotificationsModal = ref(false)
+const showLanguageModal = ref(false)
 
 const isDepositLoading = ref(false)
 const isWithdrawLoading = ref(false)
@@ -448,6 +622,19 @@ const depositError = ref('')
 const withdrawError = ref('')
 const changePasswordError = ref('')
 const changePasswordSuccess = ref('')
+
+const notifications = ref({
+  email: true,
+  push: true,
+  sms: false,
+  driver: true
+})
+
+const languages = ref([
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'rw', name: 'Kinyarwanda', flag: '🇷🇼' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' }
+])
 
 const depositForm = ref({
   amount: 5000,
@@ -688,6 +875,18 @@ const handleChangePassword = async () => {
     isChangePasswordLoading.value = false
   }
 }
+
+const saveNotifications = () => {
+  // Save notification preferences
+  localStorage.setItem('notifications', JSON.stringify(notifications.value))
+  showNotificationsModal.value = false
+}
+
+const selectLanguage = (langCode) => {
+  store.currentLang = langCode
+  localStorage.setItem('currentLang', langCode)
+  showLanguageModal.value = false
+}
 </script>
 
 <style scoped>
@@ -739,6 +938,48 @@ const handleChangePassword = async () => {
 
 .spacer {
   width: 40px;
+}
+
+.notification-menu-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color, #2E7D32);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.notification-menu-btn:hover {
+  background: #1B5E20;
+  transform: scale(1.05);
+}
+
+.notification-menu-btn:active {
+  transform: scale(0.95);
+}
+
+.notification-menu-btn::after {
+  content: '3';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #FF4444;
+  border-radius: 50%;
+  font-size: 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 /* Profile Card */
@@ -1400,5 +1641,182 @@ const handleChangePassword = async () => {
     border-radius: 12px;
     max-height: 80vh;
   }
+}
+
+/* Notifications Modal Styles */
+.notification-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--bg-tertiary, #F5F5F5);
+  border-radius: 8px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary, #333);
+  width: 100%;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 44px;
+  height: 24px;
+  background: #CCC;
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle-input:checked + .toggle-slider {
+  background: var(--primary-color, #2E7D32);
+}
+
+.toggle-input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Sample Notifications Styles */
+.sample-notifications {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color, #EEE);
+}
+
+.sample-notifications h4 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.sample-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sample-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-tertiary, #F5F5F5);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color, #2E7D32);
+}
+
+.sample-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--primary-color, #2E7D32);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sample-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sample-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.sample-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  line-height: 1.4;
+}
+
+.sample-time {
+  font-size: 11px;
+  color: var(--text-secondary, #999);
+  font-weight: 500;
+}
+
+/* Language Modal Styles */
+.language-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.language-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color, #EEE);
+  border-radius: 8px;
+  background: var(--bg-secondary, #FFF);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.language-btn:hover {
+  background: var(--bg-tertiary, #F5F5F5);
+}
+
+.language-btn.active {
+  border-color: var(--primary-color, #2E7D32);
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--primary-color, #2E7D32);
+}
+
+.language-btn .flag {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.language-btn .name {
+  flex: 1;
+  font-weight: 500;
 }
 </style>

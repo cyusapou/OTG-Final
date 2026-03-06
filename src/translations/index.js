@@ -346,6 +346,17 @@ export const translations = {
         step2: 'Destination',
         step3: 'Summary',
         step4: 'Payment',
+        
+        // Sample Notifications
+        sampleNotifications: 'Sample Notifications',
+        busArriving: 'Bus Arriving',
+        busArrivingDesc: 'Your bus is 5 minutes away from your stop',
+        routeChange: 'Route Change',
+        routeChangeDesc: 'Your bus route has been updated due to traffic',
+        delayAlert: 'Delay Alert',
+        delayAlertDesc: 'Your bus is delayed by 10 minutes',
+        stopReminder: 'Stop Reminder',
+        stopReminderDesc: 'Get ready! Your bus is approaching your stop',
     },
     rw: {
         // Navigation
@@ -688,6 +699,17 @@ export const translations = {
         step2: 'Aho Ugana',
         step3: 'Incamake',
         step4: 'Ishyura',
+        
+        // Sample Notifications
+        sampleNotifications: 'Ingero Zigarishya',
+        busArriving: 'Bisi Zigeruka',
+        busArrivingDesc: 'Bisi yanyu iminota 5 uhereye ku kanya',
+        routeChange: 'Guhindura Inzira',
+        routeChangeDesc: 'Inzira yabisiyahindutse kubera imoterere',
+        delayAlert: 'Iburira',
+        delayAlertDesc: 'Bisi yarangiritse iminota 10',
+        stopReminder: 'Ubutumiro',
+        stopReminderDesc: 'Witegura! Biri kugera ku kanya yawe',
     },
     fr: {
         // Navigation
@@ -1035,5 +1057,16 @@ export const translations = {
         step2: 'Destination',
         step3: 'Résumé',
         step4: 'Paiement',
+        
+        // Sample Notifications
+        sampleNotifications: 'Exemples de Notifications',
+        busArriving: 'Arrivée du Bus',
+        busArrivingDesc: 'Votre bus est à 5 minutes de votre arrêt',
+        routeChange: 'Changement d\'Itinéraire',
+        routeChangeDesc: 'Votre itinéraire de bus a été mis à jour en raison du trafic',
+        delayAlert: 'Alerte de Retard',
+        delayAlertDesc: 'Votre bus est retardé de 10 minutes',
+        stopReminder: 'Rappel d\'Arrêt',
+        stopReminderDesc: 'Préparez-vous! Votre bus approche de votre arrêt',
     }
 };

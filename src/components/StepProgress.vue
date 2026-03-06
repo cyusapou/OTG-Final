@@ -61,6 +61,8 @@ watch(() => route.path, () => {
   background: #FFF;
   border-bottom: 1px solid #E8E8E8;
   overflow-x: auto;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 html.dark .step-progress {

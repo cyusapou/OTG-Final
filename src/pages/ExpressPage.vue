@@ -270,7 +270,7 @@ html.dark .search-input::placeholder {
 
 html.dark .search-input:focus {
   border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+  box-shadow: none;
 }
 
 .clear-search {
@@ -342,7 +342,7 @@ html.dark .express-card {
 }
 
 html.dark .express-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: none;
 }
 
 .express-card:active {

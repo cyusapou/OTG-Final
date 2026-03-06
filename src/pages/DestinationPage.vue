@@ -1,10 +1,5 @@
 <template>
   <div class="min-h-screen bg-white dark:bg-neutral-900 transition-colors">
-    <!-- Mobile: Language toggle -->
-    <div class="absolute top-2 right-2 z-50">
-      <LanguageToggle />
-    </div>
-
     <StepProgress :current="1" :total="3" />
     
     <div class="p-4 md:p-3 md:max-w-2xl md:mx-auto flex flex-col gap-3 min-h-screen">
@@ -117,7 +112,6 @@ import { useRouter } from 'vue-router'
 import { store, stops } from '../store/index.js'
 import { translations } from '../translations/index.js'
 import { useSmartStop } from '../composables/useSmartStop.js'
-import LanguageToggle from '../components/LanguageToggle.vue'
 import StepProgress from '../components/StepProgress.vue'
 import NearestStopCard from '../components/NearestStopCard.vue'
 
