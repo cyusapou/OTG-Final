@@ -194,33 +194,33 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
-import { Icon, type Map } from 'leaflet'
-import { useNearestStation, type UserLocation } from '../composables/useNearestStation'
-import { type Station, searchStations } from '../data/stations'
+import { Icon } from 'leaflet'
+import { useNearestStation } from '../composables/useNearestStation.js'
+import { searchStations } from '../data/stations.js'
 import StationMarkers from './StationMarkers.vue'
 import BusTracker from './BusTracker.vue'
 import RoutePath from './RoutePath.vue'
 
 // Reactive state
-const mapRef = ref<typeof LMap | null>(null)
-const mapInstance = ref<Map | null>(null)
+const mapRef = ref(null)
+const mapInstance = ref(null)
 const zoom = ref(12)
 const mapCenter = ref([-1.9536, 30.0606]) // Kigali center
-const userLocation = ref<UserLocation | null>(null)
-const selectedStation = ref<Station | null>(null)
+const userLocation = ref(null)
+const selectedStation = ref(null)
 const enableSimulation = ref(true)
 
 // Search functionality
 const searchQuery = ref('')
-const searchResults = ref<Station[]>([])
+const searchResults = ref([])
 
 // Route functionality
-const destinationStation = ref<Station | null>(null)
+const destinationStation = ref(null)
 const showRoute = ref(false)
-const routeDistance = ref<number>(0)
+const routeDistance = ref(0)
 
 // Nearest station functionality
 const {
@@ -233,18 +233,14 @@ const {
   lastUpdateTime
 } = useNearestStation()
 
-const nearestResult = ref<{
-  station: Station | null
-  distance: number | null
-  error: string | null
-} | null>(null)
+const nearestResult = ref(null)
 
 // Attribution for OpenStreetMap (required by OSM Tile Usage Policy)
 const attribution = "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
 
 // Fix for default Leaflet marker icons
 const fixLeafletIcon = () => {
-  delete (Icon.Default.prototype as any)._getIconUrl
+  delete Icon.Default.prototype._getIconUrl
   Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
@@ -266,13 +262,13 @@ const userIcon = new Icon({
 const showUserInBusTracker = computed(() => true)
 
 // Map initialization
-const onMapReady = (map: Map) => {
+const onMapReady = (map) => {
   mapInstance.value = map
   console.log('Bus map ready')
 }
 
 // Handle station marker click
-const handleStationClick = (station: Station) => {
+const handleStationClick = (station) => {
   selectedStation.value = station
   console.log('Station clicked:', station.name)
 }
@@ -293,7 +289,7 @@ const clearSearch = () => {
   searchResults.value = []
 }
 
-const handleStationSelect = (station: Station) => {
+const handleStationSelect = (station) => {
   // Set up route to this station
   destinationStation.value = station
   showRoute.value = true
@@ -312,7 +308,7 @@ const handleStationSelect = (station: Station) => {
 }
 
 // Calculate distance between two points
-const calculateDistance = (from: UserLocation, to: Station): number => {
+const calculateDistance = (from, to) => {
   const R = 6371 // Earth's radius in kilometers
   const dLat = (to.lat - from.lat) * Math.PI / 180
   const dLng = (to.lng - from.lng) * Math.PI / 180
@@ -324,7 +320,7 @@ const calculateDistance = (from: UserLocation, to: Station): number => {
 }
 
 // Format time for display
-const formatTime = (date: Date): string => {
+const formatTime = (date) => {
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -345,7 +341,7 @@ const startTrackingIfLocationAvailable = () => {
 }
 
 // Zoom to specific station
-const handleZoomToStation = (station: Station) => {
+const handleZoomToStation = (station) => {
   if (mapInstance.value) {
     mapInstance.value.setView([station.lat, station.lng], 16)
     selectedStation.value = station
@@ -353,7 +349,7 @@ const handleZoomToStation = (station: Station) => {
 }
 
 // Handle bus tracking
-const handleBusTrack = (bus: any) => {
+const handleBusTrack = (bus) => {
   console.log('Tracking bus:', bus.id)
   // Could implement more detailed bus tracking here
 }

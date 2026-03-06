@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>On The Go — Admin Portal</title>
+
+<!-- Fonts: Inter (matches project exactly) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome 6.4.0 (matches project exactly) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ═══════════════════════════════════════════════════
+   PROJECT DESIGN TOKENS — exact match to codebase
+   ═══════════════════════════════════════════════════ */
+:root {
+  /* Primary Green Scale */
+  --primary-50:  #E8F5E9;
+  --primary-100: #C8E6C9;
+  --primary-200: #A5D6A7;
+  --primary-300: #81C784;
+  --primary-400: #66BB6A;
+  --primary-500: #4CAF50;   /* primary */
+  --primary-600: #43A047;
+  --primary-700: #388E3C;
+  --primary-800: #2E7D32;   /* main brand */
+  --primary-900: #1B5E20;
+
+  /* Dark Mode Variables (default — project uses dark by default) */
+  --bg-primary:   #121212;
+  --bg-secondary: #1E1E1E;
+  --bg-tertiary:  #2C2C2C;
+  --text-primary:   #E8E8E8;
+  --text-secondary: #B0B0B0;
+  --text-tertiary:  #808080;
+  --border-color:   #2C2C2C;
+
+  /* Accent */
+  --accent-500: #1976D2;
+  --accent-600: #1565C0;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-nav:  0 -1px 4px rgba(0,0,0,0.3);
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 60px;
+  --bottom-nav-height: 70px;
+
+  /* Transitions */
+  --transition: all 0.3s ease;
+}
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.fade-in { animation: fadeIn 0.3s ease; }
+.slide-down { animation: slideDown 0.3s ease; }
+.slide-up { animation: slideUp 0.25s ease; }
+
+/* ═══════════════════════════════════════════════════
+   ROLE SWITCHER BAR (demo only — top of screen)
+   ═══════════════════════════════════════════════════ */
+.role-switcher {
+  display: flex;
+  background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+  height: 40px;
+  flex-shrink: 0;
+}
+.role-switch-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+.role-switch-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,.03); }
+.role-switch-btn.active { color: var(--primary-400); border-bottom-color: var(--primary-500); }
+
+/* ═══════════════════════════════════════════════════
+   APP SHELL
+   ═══════════════════════════════════════════════════ */
+.app-shell { display:flex; height: calc(100vh - 40px); overflow:hidden; }
+
+/* ═══════════════════════════════════════════════════
+   SIDEBAR — Desktop (≥ 500px)
+   ═══════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease, min-width 0.3s ease;
+  z-index: 50;
+}
+.sidebar.collapsed { width: var(--sidebar-collapsed); min-width: var(--sidebar-collapsed); }
+
+/* Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--primary-800);
+  border-radius: 8px;
+  display: flex; align-items:center; justify-content:center;
+  color: #fff; font-size: 16px;
+  flex-shrink: 0;
+}
+.logo-text { overflow:hidden; }
+.logo-name { font-size: 15px; font-weight: 700; color: var(--text-primary); white-space:nowrap; }
+.logo-sub { font-size: 10px; color: var(--text-tertiary); white-space:nowrap; letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+
+/* Role Badge */
+.role-badge {
+  margin: 12px 12px 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  display: flex; align-items:center; gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.role-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+/* Nav Sections */
+.nav-section-title {
+  padding: 14px 16px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sidebar.collapsed .nav-section-title { opacity: 0; }
+
+.nav-list { list-style:none; padding: 0 8px; }
+.nav-list li { margin-bottom: 2px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.nav-item.active { background: var(--bg-tertiary); color: var(--primary-400); }
+.nav-item.active .nav-icon { color: var(--primary-500); }
+.nav-icon { width:18px; text-align:center; font-size:14px; flex-shrink:0; }
+.nav-label { overflow:hidden; }
+.sidebar.collapsed .nav-label { display:none; }
+
+/* Sidebar toggle */
+.sidebar-toggle {
+  display: flex; align-items:center; justify-content:center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.toggle-btn {
+  background: none; border: 1px solid var(--border-color);
+  color: var(--text-tertiary); border-radius:6px;
+  padding: 6px 10px; cursor:pointer;
+  font-size: 12px; transition: var(--transition);
+  font-family:'Inter',sans-serif;
+}
+.toggle-btn:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+/* Sidebar user */
+.sidebar-user {
+  padding: 12px 12px;
+  border-top: 1px solid var(--border-color);
+  display:flex; align-items:center; gap:10px;
+  flex-shrink:0; overflow:hidden;
+}
+.user-avatar {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.user-info { overflow:hidden; }
+.user-name { font-size:12px; font-weight:600; color:var(--text-primary); white-space:nowrap; }
+.user-role { font-size:10px; color:var(--text-tertiary); white-space:nowrap; }
+.sidebar.collapsed .user-info { display:none; }
+
+/* ═══════════════════════════════════════════════════
+   MAIN CONTENT AREA
+   ═══════════════════════════════════════════════════ */
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* TOP BAR */
+.topbar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.topbar-left { display:flex; align-items:center; gap:12px; }
+.topbar-title { font-size:16px; font-weight:700; color:var(--text-primary); }
+.topbar-right { display:flex; align-items:center; gap:8px; }
+
+/* Buttons */
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding: 8px 14px; border-radius:8px;
+  font-size:13px; font-weight:600;
+  font-family:'Inter',sans-serif; cursor:pointer;
+  transition: var(--transition); border: none; text-decoration:none;
+}
+.btn-primary { background:var(--primary-500); color:#fff; }
+.btn-primary:hover { background:var(--primary-600); }
+.btn-secondary { background:var(--bg-tertiary); color:var(--text-secondary); border:1px solid var(--border-color); }
+.btn-secondary:hover { background:#333; color:var(--text-primary); }
+.btn-outline { background:transparent; color:var(--primary-400); border:1px solid var(--primary-700); }
+.btn-outline:hover { background:rgba(76,175,80,.08); }
+.btn-ghost { background:transparent; color:var(--text-secondary); border:1px solid var(--border-color); }
+.btn-ghost:hover { background:var(--bg-tertiary); color:var(--text-primary); }
+.btn-danger { background:#7f1d1d; color:#fca5a5; border:1px solid #991b1b; }
+.btn-danger:hover { background:#991b1b; }
+.btn-sm { padding:6px 10px; font-size:12px; }
+.btn-icon { padding:8px; width:36px; height:36px; justify-content:center; }
+
+/* PAGE SCROLL AREA */
+.page-scroll {
+  flex:1; overflow-y:auto; padding:20px;
+}
+.page-scroll::-webkit-scrollbar { width:6px; }
+.page-scroll::-webkit-scrollbar-track { background:transparent; }
+.page-scroll::-webkit-scrollbar-thumb { background:var(--bg-tertiary); border-radius:3px; }
+
+/* ═══════════════════════════════════════════════════
+   SHARED COMPONENTS
+   ═══════════════════════════════════════════════════ */
+
+/* Cards */
+.card {
+  background:var(--bg-secondary);
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+}
+.card-header {
+  padding:14px 18px;
+  border-bottom:1px solid var(--border-color);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.card-title { font-size:14px; font-weight:700; color:var(--text-primary); }
+.card-subtitle { font-size:11px; color:var(--text-tertiary); margin-top:1px; }
+.card-body { padding:18px; }
+
+/* Stat cards */
+.stat-grid { display:grid; gap:14px; margin-bottom:20px; }
+.stat-grid-4 { grid-template-columns:repeat(4,1fr); }
+.stat-grid-3 { grid-template-columns:repeat(3,1fr); }
+.stat-grid-2 { grid-template-columns:repeat(2,1fr); }
+.stat-card {
+  background:var(--bg-secondary);
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  padding:16px 18px;
+  position:relative; overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.stat-card::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--card-accent,var(--border-color));
+  border-radius:10px 10px 0 0;
+}
+.stat-label { font-size:11px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+.stat-value { font-size:24px; font-weight:700; color:var(--text-primary); line-height:1; }
+.stat-sub { font-size:11px; color:var(--text-tertiary); margin-top:6px; }
+.stat-badge {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:11px; font-weight:600; padding:2px 7px; border-radius:4px; margin-top:6px;
+}
+.badge-up { background:rgba(76,175,80,.15); color:var(--primary-400); }
+.badge-down { background:rgba(220,38,38,.15); color:#f87171; }
+.badge-neutral { background:var(--bg-tertiary); color:var(--text-tertiary); }
+
+/* Status Pills */
+.pill {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:20px;
+  font-size:11px; font-weight:600;
+}
+.pill-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.pill-green { background:rgba(76,175,80,.12); color:var(--primary-400); }
+.pill-blue  { background:rgba(25,118,210,.12); color:#60a5fa; }
+.pill-amber { background:rgba(217,119,6,.12);  color:#fbbf24; }
+.pill-red   { background:rgba(220,38,38,.12);  color:#f87171; }
+.pill-grey  { background:var(--bg-tertiary); color:var(--text-secondary); }
+.pill-purple{ background:rgba(124,58,237,.12); color:#a78bfa; }
+
+/* Tables */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+thead th {
+  text-align:left; padding:10px 14px;
+  font-size:11px; font-weight:700; color:var(--text-tertiary);
+  text-transform:uppercase; letter-spacing:.06em;
+  background:var(--bg-primary); border-bottom:1px solid var(--border-color);
+  white-space:nowrap;
+}
+tbody td {
+  padding:12px 14px; font-size:13px; color:var(--text-secondary);
+  border-bottom:1px solid var(--border-color);
+}
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:rgba(255,255,255,.02); }
+
+/* Form Elements */
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:11px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.form-input {
+  width:100%; padding:10px 12px;
+  background:var(--bg-primary); border:1px solid var(--border-color);
+  border-radius:8px; color:var(--text-primary);
+  font-size:13px; font-family:'Inter',sans-serif;
+  outline:none; transition:var(--transition);
+}
+.form-input:focus { border-color:var(--primary-500); box-shadow:0 0 0 3px rgba(76,175,80,.12); }
+.form-input::placeholder { color:var(--text-tertiary); }
+select.form-input { cursor:pointer; }
+textarea.form-input { resize:vertical; min-height:90px; }
+
+/* Tabs */
+.tab-list { display:flex; gap:0; background:var(--bg-primary); padding:4px; border-radius:8px; margin-bottom:18px; }
+.tab-btn {
+  flex:1; padding:7px 12px; background:none; border:none; border-radius:6px;
+  font-size:12px; font-weight:600; cursor:pointer;
+  font-family:'Inter',sans-serif; color:var(--text-tertiary); transition:.15s; text-align:center;
+}
+.tab-btn.active { background:var(--bg-secondary); color:var(--text-primary); box-shadow:0 1px 4px rgba(0,0,0,.3); }
+
+/* Alerts */
+.alert { display:flex; gap:10px; padding:12px 14px; border-radius:8px; margin-bottom:14px; font-size:12px; align-items:flex-start; }
+.alert-warn { background:rgba(217,119,6,.08); border:1px solid rgba(217,119,6,.25); color:#fbbf24; }
+.alert-danger { background:rgba(220,38,38,.08); border:1px solid rgba(220,38,38,.25); color:#f87171; }
+.alert-info  { background:rgba(25,118,210,.08); border:1px solid rgba(25,118,210,.25); color:#60a5fa; }
+.alert-success{ background:rgba(76,175,80,.08);  border:1px solid rgba(76,175,80,.25);  color:var(--primary-400); }
+
+/* Progress Bar */
+.progress-wrap { height:6px; background:var(--bg-tertiary); border-radius:3px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:3px; transition:.5s; }
+
+/* Map placeholder */
+.map-mock {
+  background: linear-gradient(135deg,#0a1628,#0f2035,#0a1628);
+  border-radius:8px; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.map-bus { position:absolute; width:10px; height:10px; border-radius:50%; border:2px solid rgba(76,175,80,.8); }
+.map-bus::after { content:''; position:absolute; inset:-4px; border-radius:50%; border:1px solid rgba(76,175,80,.3); animation:busping 2s infinite; }
+@keyframes busping { 0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.5} }
+
+/* Live dot */
+.live-dot { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--primary-400); }
+.live-dot::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--primary-500); animation:pulse 1.5s infinite; }
+
+/* Section spacing */
+.mb-4 { margin-bottom:16px; }
+.mb-5 { margin-bottom:20px; }
+.mb-6 { margin-bottom:24px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.flex { display:flex; }
+.items-center { align-items:center; }
+.gap-2 { gap:8px; }
+.gap-3 { gap:12px; }
+.ml-auto { margin-left:auto; }
+
+/* SVG charts */
+.chart-svg { width:100%; height:140px; }
+
+/* Avatar */
+.avatar {
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:#fff; flex-shrink:0;
+}
+.av-sm { width:32px; height:32px; font-size:12px; }
+.av-md { width:40px; height:40px; font-size:14px; }
+.av-lg { width:48px; height:48px; font-size:16px; }
+
+/* Person card row */
+.person-row {
+  display:flex; align-items:center; gap:12px; padding:12px 0;
+  border-bottom:1px solid var(--border-color);
+}
+.person-row:last-child { border-bottom:none; }
+.person-info { flex:1; min-width:0; }
+.person-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+.person-meta { font-size:11px; color:var(--text-tertiary); margin-top:1px; }
+
+/* Activity feed */
+.feed-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-color); }
+.feed-item:last-child { border-bottom:none; }
+.feed-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.feed-text { font-size:12px; color:var(--text-secondary); line-height:1.5; }
+.feed-time { font-size:10px; color:var(--text-tertiary); margin-top:2px; }
+
+/* Skeleton */
+.skeleton { background:var(--bg-tertiary); border-radius:4px; animation:pulse 1.5s infinite; }
+
+/* ═══════════════════════════════════════════════════
+   MOBILE BOTTOM NAV (< 500px)
+   ═══════════════════════════════════════════════════ */
+.bottom-nav {
+  display:none;
+  position:fixed; bottom:0; left:0; right:0;
+  height:var(--bottom-nav-height);
+  background:var(--bg-secondary);
+  border-top:1px solid var(--border-color);
+  box-shadow:var(--shadow-nav);
+  z-index:100;
+}
+.bottom-nav-list { display:flex; height:100%; }
+.bottom-nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; cursor:pointer; color:var(--text-tertiary);
+  font-size:10px; font-weight:500; transition:var(--transition); padding:8px 4px;
+  border:none; background:none; font-family:'Inter',sans-serif;
+}
+.bottom-nav-item i { font-size:20px; }
+.bottom-nav-item.active { color:var(--primary-500); }
+
+/* ── RESPONSIVE ── */
+@media (max-width:499px) {
+  .sidebar { display:none; }
+  .bottom-nav { display:flex; }
+  .page-scroll { padding:14px 14px 80px; }
+  .stat-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .stat-grid-3 { grid-template-columns:repeat(2,1fr); }
+  .grid-2 { grid-template-columns:1fr; }
+  .grid-3 { grid-template-columns:1fr; }
+  .topbar { padding:0 14px; }
+  .topbar-title { font-size:14px; }
+  .hide-mobile { display:none !important; }
+}
+@media (min-width:500px) and (max-width:768px) {
+  .stat-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:1fr 1fr; }
+}
+
+/* ── PAGE VISIBILITY ── */
+.page { display:none; animation:fadeIn .2s ease; }
+.page.active { display:block; }
+</style>
+</head>
+<body>
+
+<!-- ROLE SWITCHER (demo UI) -->
+<div class="role-switcher">
+  <button class="role-switch-btn active" data-role="driver" onclick="setRole('driver',this)"><i class="fas fa-bus-alt" style="margin-right:4px"></i> Driver</button>
+  <button class="role-switch-btn" data-role="manager" onclick="setRole('manager',this)"><i class="fas fa-user-tie" style="margin-right:4px"></i> Manager</button>
+  <button class="role-switch-btn" data-role="admin" onclick="setRole('admin',this)"><i class="fas fa-building" style="margin-right:4px"></i> Admin</button>
+  <button class="role-switch-btn" data-role="rura" onclick="setRole('rura',this)"><i class="fas fa-landmark" style="margin-right:4px"></i> RURA</button>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- ══════════════════════════════════════
+       MAIN CONTENT
+       ══════════════════════════════════════ -->
+  <div class="main-content">
+    <header class="topbar" id="topbar"></header>
+    <div class="page-scroll" id="pageContent"></div>
+  </div>
+
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<!-- ═════════════════════════════════════════════════
+     PAGE TEMPLATES
+     ═════════════════════════════════════════════════ -->
+<script>
+// ─── DATA ───────────────────────────────────────
+const ROLES = {
+  driver: {
+    label:'Driver', color:'#4CAF50', icon:'fa-bus-alt', initials:'JC',
+    name:'Jean Claude N.', subtitle:'Kigali Express Bus',
+    nav:[
+      { section:'My Shift', items:[
+        {id:'dashboard', icon:'fa-tachometer-alt', label:'Dashboard'},
+        {id:'active-trip', icon:'fa-route', label:'Active Trip'},
+        {id:'my-bus', icon:'fa-bus', label:'My Bus'},
+      ]},
+      { section:'Records', items:[
+        {id:'history', icon:'fa-history', label:'Trip History'},
+        {id:'performance', icon:'fa-chart-line', label:'Performance'},
+        {id:'profile', icon:'fa-user-circle', label:'My Profile'},
+      ]},
+    ],
+    mobile:[
+      {id:'dashboard',icon:'fa-tachometer-alt',label:'Dashboard'},
+      {id:'active-trip',icon:'fa-route',label:'Trip'},
+      {id:'history',icon:'fa-history',label:'History'},
+      {id:'profile',icon:'fa-user-circle',label:'Profile'},
+    ]
+  },
+  manager: {
+    label:'Manager', color:'#1976D2', icon:'fa-user-tie', initials:'PH',
+    name:'Patrick Habimana', subtitle:'Kigali Express Bus',
+    nav:[
+      { section:'Operations', items:[
+        {id:'dashboard', icon:'fa-tachometer-alt', label:'Dashboard'},
+        {id:'live-trips', icon:'fa-satellite-dish', label:'Live Trips'},
+        {id:'schedule',   icon:'fa-calendar-alt',  label:'Schedule'},
+      ]},
+      { section:'Team', items:[
+        {id:'drivers',  icon:'fa-id-card', label:'Drivers'},
+        {id:'trips',    icon:'fa-clipboard-list', label:'Trip Manager'},
+        {id:'reports',  icon:'fa-file-alt', label:'Reports'},
+      ]},
+    ],
+    mobile:[
+      {id:'dashboard',icon:'fa-tachometer-alt',label:'Dashboard'},
+      {id:'live-trips',icon:'fa-satellite-dish',label:'Live'},
+      {id:'drivers',icon:'fa-id-card',label:'Drivers'},
+      {id:'reports',icon:'fa-file-alt',label:'Reports'},
+    ]
+  },
+  admin: {
+    label:'Admin', color:'#2E7D32', icon:'fa-building', initials:'DU',
+    name:'Diane Uwase', subtitle:'Kigali Express Bus',
+    nav:[
+      { section:'Overview', items:[
+        {id:'dashboard', icon:'fa-tachometer-alt', label:'Dashboard'},
+        {id:'fleet',     icon:'fa-bus',            label:'Fleet'},
+        {id:'routes',    icon:'fa-map-marked-alt', label:'Routes'},
+      ]},
+      { section:'Business', items:[
+        {id:'finance',    icon:'fa-chart-bar',       label:'Finance'},
+        {id:'managers',   icon:'fa-users-cog',       label:'Managers'},
+        {id:'complaints', icon:'fa-exclamation-circle', label:'Complaints'},
+      ]},
+    ],
+    mobile:[
+      {id:'dashboard',icon:'fa-tachometer-alt',label:'Dashboard'},
+      {id:'fleet',icon:'fa-bus',label:'Fleet'},
+      {id:'finance',icon:'fa-chart-bar',label:'Finance'},
+      {id:'managers',icon:'fa-users-cog',label:'Team'},
+    ]
+  },
+  rura: {
+    label:'RURA Super Admin', color:'#7c3aed', icon:'fa-landmark', initials:'SA',
+    name:'RURA SuperAdmin', subtitle:'National Regulator',
+    nav:[
+      { section:'Overview', items:[
+        {id:'dashboard',     icon:'fa-tachometer-alt',   label:'Dashboard'},
+        {id:'expresses',     icon:'fa-building',         label:'Companies'},
+        {id:'analytics',     icon:'fa-chart-pie',        label:'Analytics'},
+      ]},
+      { section:'Regulation', items:[
+        {id:'compliance',    icon:'fa-shield-alt',       label:'Compliance'},
+        {id:'feedback',      icon:'fa-comment-dots',     label:'Feedback'},
+        {id:'announcements', icon:'fa-bullhorn',         label:'Announcements'},
+        {id:'users',         icon:'fa-user-shield',      label:'Users'},
+      ]},
+    ],
+    mobile:[
+      {id:'dashboard',icon:'fa-tachometer-alt',label:'Dashboard'},
+      {id:'expresses',icon:'fa-building',label:'Companies'},
+      {id:'compliance',icon:'fa-shield-alt',label:'Compliance'},
+      {id:'analytics',icon:'fa-chart-pie',label:'Analytics'},
+    ]
+  }
+}
+
+let currentRole = 'driver'
+let currentPage = 'dashboard'
+let sidebarCollapsed = false
+
+// ─── INIT ────────────────────────────────────────
+function setRole(role, btn) {
+  document.querySelectorAll('.role-switch-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  currentRole = role
+  currentPage = 'dashboard'
+  renderAll()
+}
+function setPage(page) {
+  currentPage = page
+  document.querySelectorAll('.nav-item').forEach(a=>a.classList.toggle('active', a.dataset.page===page))
+  document.querySelectorAll('.bottom-nav-item').forEach(a=>a.classList.toggle('active', a.dataset.page===page))
+  renderTopbar()
+  renderContent()
+}
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed
+  const sb = document.getElementById('sidebar')
+  sb.classList.toggle('collapsed', sidebarCollapsed)
+}
+
+function renderAll() {
+  renderSidebar()
+  renderTopbar()
+  renderContent()
+  renderBottomNav()
+}
+
+// ─── SIDEBAR ─────────────────────────────────────
+function renderSidebar() {
+  const r = ROLES[currentRole]
+  let html = `
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-bus"></i></div>
+      <div class="logo-text"><div class="logo-name">On The Go</div><div class="logo-sub">Rwanda Transit</div></div>
+    </div>
+    <div class="role-badge" style="background:${r.color}15;color:${r.color}">
+      <div class="role-dot" style="background:${r.color}"></div>
+      <span class="nav-label">${r.label}</span>
+    </div>`
+
+  r.nav.forEach(sec => {
+    html += `<div class="nav-section-title">${sec.section}</div><ul class="nav-list">`
+    sec.items.forEach(item => {
+      const active = item.id === currentPage ? 'active' : ''
+      html += `<li><a class="nav-item ${active}" data-page="${item.id}" onclick="setPage('${item.id}')">
+        <span class="nav-icon"><i class="fas ${item.icon}"></i></span>
+        <span class="nav-label">${item.label}</span>
+      </a></li>`
+    })
+    html += `</ul>`
+  })
+
+  html += `
+    <div style="flex:1"></div>
+    <div class="sidebar-toggle">
+      <button class="toggle-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i> <span class="nav-label" style="margin-left:4px">Collapse</span>
+      </button>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar av-sm" style="background:${r.color}">${r.initials}</div>
+      <div class="user-info"><div class="user-name">${r.name}</div><div class="user-role">${r.subtitle}</div></div>
+    </div>`
+
+  document.getElementById('sidebar').innerHTML = html
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed)
+}
+
+// ─── BOTTOM NAV ──────────────────────────────────
+function renderBottomNav() {
+  const r = ROLES[currentRole]
+  let html = `<div class="bottom-nav-list">`
+  r.mobile.forEach(item => {
+    const active = item.id === currentPage ? 'active' : ''
+    html += `<button class="bottom-nav-item ${active}" data-page="${item.id}" onclick="setPage('${item.id}')">
+      <i class="fas ${item.icon}"></i><span>${item.label}</span>
+    </button>`
+  })
+  html += `</div>`
+  document.getElementById('bottomNav').innerHTML = html
+}
+
+// ─── TOPBAR ──────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'Dashboard', 'active-trip':'Active Trip', 'my-bus':'My Bus',
+  history:'Trip History', performance:'Performance', profile:'My Profile',
+  'live-trips':'Live Trips', schedule:'Schedule', drivers:'Drivers',
+  trips:'Trip Manager', reports:'Reports',
+  fleet:'Fleet Management', routes:'Routes', finance:'Finance',
+  managers:'Manager Staff', complaints:'Complaints',
+  expresses:'Transport Companies', analytics:'Analytics',
+  compliance:'Compliance', feedback:'Passenger Feedback',
+  announcements:'Announcements', users:'Portal Users',
+}
+const PAGE_ACTIONS = {
+  dashboard: '',
+  fleet: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Bus</button>`,
+  routes: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Route</button>`,
+  drivers: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Driver</button>`,
+  managers: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Manager</button>`,
+  expresses: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Register Company</button>`,
+  users: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create User</button>`,
+  announcements: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Announcement</button>`,
+  schedule: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Schedule Trip</button>`,
+  trips: `<button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Schedule Trip</button>`,
+}
+function renderTopbar() {
+  const r = ROLES[currentRole]
+  const title = PAGE_TITLES[currentPage] || currentPage
+  const actions = PAGE_ACTIONS[currentPage] || ''
+  document.getElementById('topbar').innerHTML = `
+    <div class="topbar-left">
+      <div class="topbar-title">${title}</div>
+    </div>
+    <div class="topbar-right">
+      ${actions}
+      <button class="btn btn-ghost btn-icon hide-mobile" title="Notifications">
+        <i class="fas fa-bell"></i>
+        <span style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--primary-500);border-radius:50%;"></span>
+      </button>
+      <div class="avatar av-sm" style="background:${r.color};cursor:pointer">${r.initials}</div>
+    </div>`
+}
+
+// ─── CONTENT RENDERER ────────────────────────────
+function renderContent() {
+  const fn = PAGES[currentRole]?.[currentPage] || PAGES._fallback
+  document.getElementById('pageContent').innerHTML = `<div class="fade-in">${fn()}</div>`
+}
+
+// ═══════════════════════════════════════════════════
+// PAGE CONTENT LIBRARY
+// ═══════════════════════════════════════════════════
+const PAGES = {
+  _fallback: () => `<div style="text-align:center;padding:60px;color:var(--text-tertiary)">
+    <i class="fas fa-tools" style="font-size:32px;margin-bottom:12px;display:block"></i>
+    Page coming soon in full build
+  </div>`,
+
+  // ════════════════ DRIVER ════════════════
+  driver: {
+    dashboard: () => `
+      <div class="alert alert-info mb-5">
+        <i class="fas fa-info-circle"></i>
+        <span>You have <strong>1 trip assigned today</strong> — KE-042 departing at 09:00 from Nyabugogo.</span>
+      </div>
+      <div class="stat-grid stat-grid-3 mb-5">
+        <div class="stat-card" style="--card-accent:var(--primary-500)">
+          <div class="stat-label">Today's Trips</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">Next: 09:00 departure</div>
+        </div>
+        <div class="stat-card" style="--card-accent:var(--primary-500)">
+          <div class="stat-label">My Rating</div>
+          <div class="stat-value">⭐ 4.9</div>
+          <div class="stat-sub">From 234 ratings</div>
+        </div>
+        <div class="stat-card" style="--card-accent:#1976D2">
+          <div class="stat-label">On-Time Rate</div>
+          <div class="stat-value">96%</div>
+          <div class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> +3% this week</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card mb-5">
+          <div class="card-header">
+            <div><div class="card-title">Today's Assignment</div><div class="card-subtitle">KE-042 · Kigali Express Bus</div></div>
+            <span class="pill pill-green"><span class="pill-dot"></span> Active</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              ${[['Route','Nyabugogo → CBD'],['Bus','RAB 221A · Toyota Coaster'],['Departure','09:00 AM'],['Passengers','24 / 30'],['Status','In Progress']].map(([k,v])=>`
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="color:var(--text-tertiary)">${k}</span>
+                  <span style="font-weight:600;color:var(--text-primary)">${v}</span>
+                </div>`).join('')}
+              <button class="btn btn-primary" style="margin-top:4px;width:100%;justify-content:center" onclick="setPage('active-trip')">
+                <i class="fas fa-route"></i> Open Trip View
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-5">
+          <div class="card-header"><div class="card-title"><i class="fas fa-clock" style="color:var(--primary-500);margin-right:6px"></i>Recent Activity</div></div>
+          <div class="card-body" style="padding:12px 16px">
+            ${[
+              ['fa-check-circle','#4CAF50','Trip KE-041 completed','Yesterday · 28/30 passengers'],
+              ['fa-star','#fbbf24','Received 5-star rating','Yesterday from passenger'],
+              ['fa-exclamation-triangle','#fbbf24','Minor delay logged','2 days ago · +8 minutes'],
+              ['fa-check-circle','#4CAF50','Trip KE-039 completed','2 days ago · 30/30 passengers'],
+            ].map(([ic,c,t,m])=>`
+              <div class="feed-item">
+                <div class="feed-icon" style="background:${c}15"><i class="fas ${ic}" style="color:${c}"></i></div>
+                <div><div class="feed-text">${t}</div><div class="feed-time">${m}</div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+
+    'active-trip': () => `
+      <div class="card mb-5" style="background:linear-gradient(135deg,#0f2535,#0b1117);border-color:#1e3a5a">
+        <div class="card-body">
+          <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Next Stop</div>
+          <div style="font-size:26px;font-weight:800;color:var(--text-primary);margin-bottom:4px">Kimironko Market</div>
+          <div style="font-size:13px;color:var(--text-tertiary);margin-bottom:20px">Estimated arrival in <strong style="color:var(--primary-400)">4 minutes</strong></div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            ${['Nyabugogo','Stadium','CBD','Remera','Kimironko'].map((s,i)=>`
+              <div style="flex:1;height:6px;border-radius:3px;background:${i<3?'var(--primary-500)':i===3?'#d97706':'var(--bg-tertiary)'}"></div>`).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-tertiary);margin-bottom:20px">
+            ${['Nyabugogo','Stadium','CBD','Remera','Kimironko'].map(s=>`<span>${s}</span>`).join('')}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            ${[['24','Passengers'],['Stop 4/5','Progress'],['On Time','Status']].map(([v,l])=>`
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px;text-align:center">
+                <div style="font-size:18px;font-weight:700;color:var(--text-primary)">${v}</div>
+                <div style="font-size:10px;color:var(--text-tertiary);margin-top:3px">${l}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="grid-2 mb-5">
+        <button class="btn btn-secondary" style="justify-content:center;padding:12px"><i class="fas fa-clock"></i>&nbsp; Report Delay</button>
+        <button class="btn btn-primary" style="justify-content:center;padding:12px"><i class="fas fa-map-marker-alt"></i>&nbsp; Mark Stop Arrived</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><i class="fas fa-list-check" style="color:var(--primary-500);margin-right:6px"></i>Route Waypoints</div></div>
+        <div class="card-body" style="padding:0">
+          ${[['Nyabugogo Main','06:00','Departed','done'],['National Stadium','06:18','Departed','done'],['CBD Centre','06:35','Departed','done'],['Remera Junction','06:52','In 4 min','current'],['Kimironko Terminal','07:10','Scheduled','upcoming']].map(([stop,t,s,state])=>`
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border-color)">
+              <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:${state==='done'?'var(--primary-500)':state==='current'?'#fbbf24':'var(--bg-tertiary)'}"></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600;color:${state==='upcoming'?'var(--text-tertiary)':'var(--text-primary)'}">${stop}</div></div>
+              <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${state==='current'?'#fbbf24':'var(--text-secondary)'}">${s}</div><div style="font-size:10px;color:var(--text-tertiary)">${t}</div></div>
+            </div>`).join('')}
+        </div>
+      </div>`,
+
+    performance: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Rating','⭐ 4.9','234 ratings','var(--primary-500)'],['On-Time %','96%','↑ +3% this month','var(--primary-500)'],['Trips (MTD)','142','12 more than last','#1976D2'],['Incidents','0','Clean record!','var(--primary-500)']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}">
+            <div class="stat-label">${l}</div><div class="stat-value">${v}</div><div class="stat-sub">${s}</div>
+          </div>`).join('')}
+      </div>
+      <div class="card mb-5">
+        <div class="card-header"><div class="card-title"><i class="fas fa-chart-line" style="color:var(--primary-500);margin-right:6px"></i>On-Time Performance — Last 4 Weeks</div></div>
+        <div class="card-body">
+          <svg class="chart-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+            <defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4CAF50" stop-opacity=".25"/><stop offset="100%" stop-color="#4CAF50" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,60 C40,50 80,55 120,40 S200,30 240,25 S320,15 360,10 S380,8 400,8" fill="none" stroke="#4CAF50" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M0,60 C40,50 80,55 120,40 S200,30 240,25 S320,15 360,10 S380,8 400,8 L400,120 L0,120Z" fill="url(#dg)"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-tertiary);margin-top:4px">
+            <span>Week 1: 91%</span><span>Week 2: 93%</span><span>Week 3: 94%</span><span>Week 4: 96%</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Trip History</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trip ID</th><th>Route</th><th>Date</th><th>Passengers</th><th>On Time</th><th>Rating</th></tr></thead>
+            <tbody>
+              ${[['KE-041','Nyabugogo → CBD','Today','28/30','✅ Yes','⭐ 5.0'],['KE-038','CBD → Nyabugogo','Yesterday','30/30','✅ Yes','⭐ 4.8'],['KE-034','Nyabugogo → CBD','Yesterday','22/30','⚠️ +8min','⭐ 4.6'],['KE-030','CBD → Remera','2 days ago','25/30','✅ Yes','⭐ 4.9']].map(([id,r,d,p,ot,rt])=>`
+                <tr><td style="font-weight:600;color:var(--text-primary)">${id}</td><td>${r}</td><td style="color:var(--text-tertiary)">${d}</td><td>${p}</td><td>${ot}</td><td>${rt}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    history: () => `
+      <div class="card mb-5">
+        <div class="card-header">
+          <div class="card-title">Trip History</div>
+          <div style="display:flex;gap:8px">
+            <select class="form-input" style="width:auto;font-size:12px;padding:6px 10px"><option>This Month</option><option>Last Month</option><option>Last 3 Months</option></select>
+            <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trip</th><th>Route</th><th>Date</th><th>Dep.</th><th>Arr.</th><th>Passengers</th><th>Status</th></tr></thead>
+            <tbody>
+              ${[
+                ['KE-041','Nyabugogo → CBD','Today','09:00','09:48','28/30','completed'],
+                ['KE-038','CBD → Nyabugogo','Yesterday','14:30','15:15','30/30','completed'],
+                ['KE-034','Nyabugogo → CBD','Yesterday','09:00','09:56','22/30','delayed'],
+                ['KE-030','CBD → Remera','2d ago','11:00','11:42','25/30','completed'],
+                ['KE-027','Nyabugogo → CBD','3d ago','09:00','09:45','30/30','completed'],
+              ].map(([id,r,d,dep,arr,p,s])=>`
+                <tr>
+                  <td style="font-weight:600;color:var(--text-primary)">${id}</td>
+                  <td>${r}</td><td style="color:var(--text-tertiary)">${d}</td>
+                  <td>${dep}</td><td>${arr}</td><td>${p}</td>
+                  <td><span class="pill ${s==='completed'?'pill-green':s==='delayed'?'pill-amber':'pill-red'}">${s}</span></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    'my-bus': () => `
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-bus" style="color:var(--primary-500);margin-right:6px"></i>RAB 221A</div><span class="pill pill-green"><span class="pill-dot"></span>Active</span></div>
+          <div class="card-body">
+            ${[['Model','Toyota Coaster'],['Year','2021'],['Capacity','30 seats'],['Fuel','Diesel'],['Inspection','Valid until Dec 2025'],['Insurance','Valid until Mar 2026']].map(([k,v])=>`
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);font-size:13px">
+                <span style="color:var(--text-tertiary)">${k}</span><span style="font-weight:600;color:var(--text-primary)">${v}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="card mb-4">
+            <div class="card-header"><div class="card-title">Amenities</div></div>
+            <div class="card-body">
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${['✅ Air Conditioning','✅ WiFi','✅ USB Charging','✅ Legroom+','❌ EV'].map(f=>`
+                  <span style="background:var(--bg-tertiary);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text-secondary)">${f}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Pre-Trip Checklist</div></div>
+            <div class="card-body">
+              ${[['Tires OK','done'],['Lights OK','done'],['Brakes OK','done'],['Fuel > 25%','done'],['Documents','pending']].map(([l,s])=>`
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-color);font-size:13px">
+                  <i class="fas ${s==='done'?'fa-check-circle':'fa-circle'}" style="color:${s==='done'?'var(--primary-500)':'var(--text-tertiary)'}"></i>
+                  <span style="color:${s==='done'?'var(--text-primary)':'var(--text-tertiary)'}">${l}</span>
+                </div>`).join('')}
+              <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center"><i class="fas fa-paper-plane"></i> Submit Checklist</button>
+            </div>
+          </div>
+        </div>
+      </div>`,
+  },
+
+  // ════════════════ MANAGER ════════════════
+  manager: {
+    dashboard: () => `
+      <div class="alert alert-warn mb-5">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><strong>Trip KE-044 delayed</strong> — Bus RAB 089B reported traffic near Remera. ETA updated +15 min.</span>
+      </div>
+      <div class="stat-grid stat-grid-3 mb-5">
+        ${[['Trips Today','32','18 running · 14 scheduled','var(--primary-500)'],['Drivers On Duty','12','3 idle','#1976D2'],['Incidents Open','2','⚠️ Requires action','#dc2626']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}">
+            <div class="stat-label">${l}</div><div class="stat-value">${v}</div><div class="stat-sub">${s}</div>
+          </div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-stream" style="color:var(--primary-500);margin-right:6px"></i>Today's Trip Timeline</div><span class="live-dot">Live</span></div>
+          <div class="card-body" style="padding:0">
+            ${[
+              ['06:00','KE-030','Nyabugogo → CBD','completed','var(--primary-500)'],
+              ['09:00','KE-042','Nyabugogo → CBD','in_progress','#1976D2'],
+              ['09:30','KE-044','Nyamirambo → Remera','delayed','#fbbf24'],
+              ['10:00','KE-045','Gisozi → Downtown','scheduled','var(--text-tertiary)'],
+              ['11:00','KE-048','Nyabugogo → CBD','scheduled','var(--text-tertiary)'],
+            ].map(([time,id,route,s,c])=>`
+              <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-color)">
+                <span style="font-size:11px;color:var(--text-tertiary);width:42px;flex-shrink:0">${time}</span>
+                <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>
+                <div style="flex:1;font-size:12px;font-weight:600;color:${s==='scheduled'?'var(--text-tertiary)':'var(--text-primary)'}">${id} · ${route}</div>
+                <span class="pill ${s==='completed'?'pill-green':s==='in_progress'?'pill-blue':s==='delayed'?'pill-amber':'pill-grey'}" style="font-size:10px">${s}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">On-Duty Drivers</div><button class="btn btn-ghost btn-sm" onclick="setPage('drivers')">View All</button></div>
+          <div class="card-body" style="padding:8px 16px">
+            ${[
+              ['Jean C.','on_trip','KE-042 · RAB 221A','var(--primary-500)'],
+              ['Patrick B.','on_trip','KE-043 · RAB 445C','var(--primary-500)'],
+              ['Claudette U.','delayed','KE-044 · RAB 089B','#fbbf24'],
+              ['Emmanuel K.','active','Standby','#1976D2'],
+              ['Solange M.','off_duty','—','var(--text-tertiary)'],
+            ].map(([n,s,assign,c])=>`
+              <div class="person-row">
+                <div class="avatar av-sm" style="background:${c}">${n[0]}</div>
+                <div class="person-info"><div class="person-name">${n}</div><div class="person-meta">${assign}</div></div>
+                <span class="pill ${s==='on_trip'?'pill-green':s==='delayed'?'pill-amber':s==='active'?'pill-blue':'pill-grey'}" style="font-size:10px">${s}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+
+    'live-trips': () => `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span class="live-dot">18 trips live</span>
+        <span style="font-size:12px;color:var(--text-tertiary)">Last updated: just now</span>
+        <button class="btn btn-ghost btn-sm ml-auto"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="grid-2">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${[
+            ['KE-042','Nyabugogo → CBD','Jean Claude','24/30','On time','var(--primary-500)'],
+            ['KE-043','CBD → Kimironko','Patrick B.','18/30','On time','var(--primary-500)'],
+            ['KE-044','Nyamirambo → Remera','Claudette U.','10/30','+15 min delay','#fbbf24'],
+            ['KE-046','Gisozi → Downtown','Emmanuel K.','22/30','On time','var(--primary-500)'],
+          ].map(([id,r,d,occ,s,c])=>`
+            <div class="card" style="border-left:3px solid ${c}">
+              <div class="card-body" style="padding:14px 16px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary)">${id} — ${r}</div>
+                    <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px"><i class="fas fa-user"></i> ${d} &nbsp;·&nbsp; <i class="fas fa-users"></i> ${occ}</div>
+                  </div>
+                  <span class="pill ${s.includes('delay')?'pill-amber':'pill-green'}" style="font-size:10px">${s}</span>
+                </div>
+                <div class="progress-wrap mb-4"><div class="progress-fill" style="width:${['60%','45%','30%','70%'][Math.floor(Math.random()*4)]};background:${c}"></div></div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-ghost btn-sm"><i class="fas fa-map-marker-alt"></i> Track</button>
+                  <button class="btn btn-ghost btn-sm" style="color:#fbbf24;border-color:rgba(251,191,36,.3)"><i class="fas fa-clock"></i> Delay</button>
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-map" style="color:var(--primary-500);margin-right:6px"></i>Live Map</div><span class="live-dot">Live</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="map-mock" style="height:420px;margin:0">
+              ${Array(6).fill(0).map((_,i)=>`<div class="map-bus" style="top:${15+i*13}%;left:${20+i*11}%;animation-delay:${i*.5}s"></div>`).join('')}
+              <span style="color:rgba(255,255,255,.2);font-size:11px;z-index:5">Kigali, Rwanda · 18 buses</span>
+            </div>
+          </div>
+        </div>
+      </div>`,
+
+    schedule: () => `
+      <div class="alert alert-info mb-5">
+        <i class="fas fa-lightbulb"></i>
+        <span>Click any cell to assign a trip. Red highlight means a scheduling conflict was detected.</span>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Weekly Schedule — Kigali Express Bus</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-left"></i></button>
+            <span style="font-size:13px;font-weight:600;color:var(--text-secondary);align-self:center">Mar 3 – Mar 9, 2026</span>
+            <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Route</th>
+                ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<th style="text-align:center;min-width:90px">${d}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${['Nyabugogo → CBD','CBD → Kimironko','Nyamirambo → Remera','Gisozi → Downtown'].map((route,ri)=>`
+                <tr>
+                  <td style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap">${route}</td>
+                  ${[0,1,2,3,4,5,6].map(di=>{
+                    const has = Math.random()>.25
+                    const conflict = di===2 && ri===1
+                    return `<td style="text-align:center;padding:6px">
+                      ${has?`<div style="background:${conflict?'rgba(220,38,38,.15)':'rgba(76,175,80,.1)'};border:1px solid ${conflict?'rgba(220,38,38,.3)':'rgba(76,175,80,.2)'};border-radius:6px;padding:5px;cursor:pointer;font-size:11px;font-weight:600;color:${conflict?'#f87171':'var(--primary-400)'}">
+                        ${['06:00','07:30','09:00','10:30'][ri]}<br><span style="font-size:10px;opacity:.8">3 trips</span>
+                      </div>`:`<div style="color:var(--border-color);font-size:18px;cursor:pointer" title="Add trip">+</div>`}
+                    </td>`
+                  }).join('')}
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    drivers: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Total','15','#1976D2'],['On Trip','8','var(--primary-500)'],['Active','3','var(--primary-500)'],['Off Duty','4','var(--text-tertiary)']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Drivers</div>
+          <input class="form-input" style="width:200px;font-size:12px;padding:7px 12px" placeholder="🔍 Search drivers...">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Driver</th><th>Status</th><th>Current Assignment</th><th>Shift</th><th>Rating</th><th>On-Time</th><th></th></tr></thead>
+            <tbody>
+              ${[
+                ['Jean Claude Nkusi','on_trip','RAB 221A · KE-042','06:00–18:00','⭐ 4.9','96%','var(--primary-500)'],
+                ['Claudette Uwera','on_trip','RAB 089B · KE-043','06:00–18:00','⭐ 4.8','93%','var(--primary-500)'],
+                ['Patrick Bizimana','active','—','12:00–00:00','⭐ 4.7','91%','#1976D2'],
+                ['Solange Mukakalisa','off_duty','—','Next: Tomorrow','⭐ 4.6','88%','var(--text-tertiary)'],
+                ['Emmanuel Kayumba','on_trip','RAB 001G · KE-046','08:00–20:00','⭐ 4.5','89%','var(--primary-500)'],
+              ].map(([n,s,a,sh,r,ot,c])=>`
+                <tr>
+                  <td><div style="display:flex;align-items:center;gap:10px">
+                    <div class="avatar av-sm" style="background:${c}">${n[0]}</div>
+                    <span style="font-weight:600;color:var(--text-primary)">${n}</span>
+                  </div></td>
+                  <td><span class="pill ${s==='on_trip'?'pill-green':s==='active'?'pill-blue':'pill-grey'}">${s}</span></td>
+                  <td style="font-size:12px">${a}</td>
+                  <td style="font-size:12px;color:var(--text-tertiary)">${sh}</td>
+                  <td>${r}</td>
+                  <td style="font-weight:600;color:${parseInt(ot)>=90?'var(--primary-400)':'#fbbf24'}">${ot}</td>
+                  <td><div style="display:flex;gap:6px">
+                    <button class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i></button>
+                    <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
+                  </div></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    reports: () => `
+      <div class="stat-grid stat-grid-3 mb-5">
+        ${[['Trips Today','32','18 completed','var(--primary-500)'],['On-Time Rate','91%','↑ +4% this week','var(--primary-500)'],['Total Passengers','1,248','↑ +8% today','#1976D2']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value">${v}</div>
+            <div class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> ${s}</div>
+          </div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Trip Performance — 7 Days</div></div>
+          <div class="card-body">
+            <svg class="chart-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+              <defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1976D2" stop-opacity=".25"/><stop offset="100%" stop-color="#1976D2" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,80 C60,65 100,70 140,55 S220,40 260,50 S320,35 360,28 S380,25 400,22" fill="none" stroke="#1976D2" stroke-width="2.5"/>
+              <path d="M0,80 C60,65 100,70 140,55 S220,40 260,50 S320,35 360,28 S380,25 400,22 L400,120 L0,120Z" fill="url(#rg)"/>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-tertiary);margin-top:4px">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Driver Performance</div></div>
+          <div class="card-body" style="padding:8px 16px">
+            ${[['Jean Claude','96%','var(--primary-500)'],['Claudette U.','93%','var(--primary-500)'],['Patrick B.','91%','#1976D2'],['Emmanuel K.','89%','#1976D2'],['Solange M.','88%','#fbbf24']].map(([n,pct,c])=>`
+              <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                  <span style="font-weight:600">${n}</span><span style="font-weight:700;color:${c}">${pct}</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:${pct};background:${c}"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Generate Report</div></div>
+        <div class="card-body">
+          <div class="grid-3">
+            <div class="form-group"><label class="form-label">Report Type</label>
+              <select class="form-input"><option>Daily Summary</option><option>Trip Performance</option><option>Driver Report</option><option>Incident Report</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Date Range</label>
+              <select class="form-input"><option>Today</option><option>This Week</option><option>This Month</option><option>Custom</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Format</label>
+              <select class="form-input"><option>PDF</option><option>CSV</option><option>JSON</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary"><i class="fas fa-file-download"></i> Generate Report</button>
+        </div>
+      </div>`,
+  },
+
+  // ════════════════ ADMIN ════════════════
+  admin: {
+    dashboard: () => `
+      <div class="alert alert-warn mb-5">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><strong>Action needed:</strong> Bus RAB 112A is due for inspection in 3 days. Driver Emmanuel's license expires in 12 days.</span>
+      </div>
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Active Trips','18','🟢 Running now','var(--primary-500)'],['Revenue Today','RWF 980K','↑ 14% vs yesterday','var(--primary-800)'],['On-Time Rate','91%','↑ +4%','var(--primary-500)'],['Staff On Duty','23','12 drivers · 8 workers','#1976D2']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div>
+          <div class="stat-value" style="font-size:${l==='Revenue Today'?'18px':'24px'}">${v}</div>
+          <div class="stat-sub">${s}</div></div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-map" style="color:var(--primary-500);margin-right:6px"></i>Live Fleet Map</div><span class="live-dot">Live</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="map-mock" style="height:200px">
+              ${Array(8).fill(0).map((_,i)=>`<div class="map-bus" style="top:${10+i*10}%;left:${15+i*9}%;animation-delay:${i*.3}s"></div>`).join('')}
+              <span style="color:rgba(255,255,255,.2);font-size:11px;z-index:5">18 buses live across Kigali</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-bus" style="color:var(--primary-500);margin-right:6px"></i>Fleet Status</div><button class="btn btn-ghost btn-sm" onclick="setPage('fleet')">View Fleet</button></div>
+          <div class="card-body">
+            ${[['On Trip','18','var(--primary-500)'],['Idle','2','#1976D2'],['Maintenance','1','#fbbf24'],['Retired','0','var(--text-tertiary)']].map(([l,n,c])=>`
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color)">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${c}"></div>
+                  <span style="font-size:13px">${l}</span>
+                </div>
+                <span style="font-weight:700;color:${c};font-size:16px">${n}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Revenue Trend — Last 7 Days</div>
+          <select class="form-input" style="width:auto;font-size:12px;padding:6px 10px"><option>7 Days</option><option>30 Days</option><option>90 Days</option></select>
+        </div>
+        <div class="card-body">
+          <svg class="chart-svg" viewBox="0 0 400 140" preserveAspectRatio="none">
+            <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2E7D32" stop-opacity=".3"/><stop offset="100%" stop-color="#2E7D32" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,90 C50,70 90,85 130,60 S200,40 240,55 S290,25 330,30 S370,15 400,18" fill="none" stroke="#4CAF50" stroke-width="2.5"/>
+            <path d="M0,90 C50,70 90,85 130,60 S200,40 240,55 S290,25 330,30 S370,15 400,18 L400,140 L0,140Z" fill="url(#ag)"/>
+          </svg>
+          <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--text-tertiary);margin-top:6px">
+            ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<span>${d}</span>`).join('')}
+          </div>
+        </div>
+      </div>`,
+
+    fleet: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Total Buses','12','var(--primary-500)'],['On Trip','8','var(--primary-500)'],['Maintenance','1','#fbbf24'],['Idle','3','#1976D2']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}
+      </div>
+      <div class="tab-list mb-5">
+        ${['All Buses (12)','On Trip (8)','Idle (3)','Maintenance (1)'].map((t,i)=>`<button class="tab-btn ${i===0?'active':''}" onclick="this.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${t}</button>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        ${[
+          ['RAB 221A','Toyota Coaster','on_trip','Jean C.','var(--primary-500)'],
+          ['RAB 445C','Rosa Bus 35','on_trip','Patrick B.','var(--primary-500)'],
+          ['RAB 112A','Yutong City','idle','—','#1976D2'],
+          ['RAB 089B','Rosa Bus 35','on_trip','Claudette U.','var(--primary-500)'],
+          ['RAB 334D','Toyota Coaster','maintenance','—','#fbbf24'],
+          ['RAB 556E','Yutong City','on_trip','Solange M.','var(--primary-500)'],
+          ['RAB 778F','Rosa Bus 35','idle','—','#1976D2'],
+          ['RAB 001G','Toyota Coaster','on_trip','Emmanuel K.','var(--primary-500)'],
+        ].map(([plate,model,status,driver,c])=>`
+          <div class="card" style="cursor:pointer;transition:var(--transition)" onmouseenter="this.style.borderColor='${c}40'" onmouseleave="this.style.borderColor='var(--border-color)'">
+            <div class="card-body" style="padding:14px">
+              <div style="font-size:20px;margin-bottom:8px"><i class="fas fa-bus" style="color:${c}"></i></div>
+              <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:3px">${plate}</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">${model}</div>
+              <div style="height:4px;background:var(--bg-tertiary);border-radius:2px;margin-bottom:10px"><div style="height:100%;background:${c};border-radius:2px;width:${status==='on_trip'?'75%':status==='maintenance'?'100%':'0%'}"></div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span class="pill ${status==='on_trip'?'pill-green':status==='maintenance'?'pill-amber':'pill-blue'}" style="font-size:10px">${status}</span>
+                <span style="font-size:10px;color:var(--text-tertiary)">${driver}</span>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`,
+
+    finance: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Revenue Today','RWF 980K','↑ 14%','var(--primary-500)'],['Revenue MTD','RWF 18.2M','↑ 8%','var(--primary-500)'],['Avg Fare','RWF 487','↑ 3%','#1976D2'],['Occupancy','74%','↑ 5%','#1976D2']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div>
+          <div class="stat-value" style="font-size:${v.includes('RWF')?'18px':'24px'}">${v}</div>
+          <div class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> ${s}</div></div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-credit-card" style="color:var(--primary-500);margin-right:6px"></i>Payment Methods</div></div>
+          <div class="card-body">
+            ${[['MTN MoMo','62%','#fbbf24'],['Cash','21%','var(--text-tertiary)'],['Airtel Money','14%','#f87171'],['Card','3%','#60a5fa']].map(([l,p,c])=>`
+              <div style="margin-bottom:14px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;font-weight:600;color:var(--text-secondary)">${l}</span>
+                  <span style="font-size:12px;font-weight:700;color:${c}">${p}</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:${p};background:${c}"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-trophy" style="color:var(--primary-500);margin-right:6px"></i>Top Routes by Revenue</div></div>
+          <div class="card-body">
+            ${[['Nyabugogo → CBD','RWF 420K',94],['CBD → Kimironko','RWF 280K',87],['Nyamirambo → Remera','RWF 190K',78],['Gisozi → Downtown','RWF 90K',60]].map(([r,v,pct])=>`
+              <div style="margin-bottom:14px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;font-weight:600">${r}</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary-400)">${v}</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--primary-800),var(--primary-500))"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Transactions</div>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" style="width:200px;font-size:12px;padding:7px 12px" placeholder="🔍 Search...">
+            <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ref</th><th>Passenger</th><th>Route</th><th>Method</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+            <tbody>
+              ${[
+                ['TXN-8821','Alice Mukamana','Nyabugogo → CBD','MTN MoMo','RWF 500','completed','10:42'],
+                ['TXN-8820','Robert Nshuti','CBD → Kimironko','Cash','RWF 400','completed','10:38'],
+                ['TXN-8819','Marie Ingabire','Nyamirambo → Remera','Airtel','RWF 450','completed','10:35'],
+                ['TXN-8818','David Habimana','Gisozi → Downtown','MTN MoMo','RWF 500','refunded','10:21'],
+              ].map(([ref,p,r,m,amt,s,t])=>`
+                <tr>
+                  <td style="font-family:monospace;font-size:11px;color:var(--text-tertiary)">${ref}</td>
+                  <td style="font-weight:600;color:var(--text-primary)">${p}</td>
+                  <td style="font-size:12px">${r}</td>
+                  <td><span class="pill ${m==='MTN MoMo'?'pill-amber':m==='Cash'?'pill-grey':m==='Airtel'?'pill-red':'pill-blue'}" style="font-size:10px">${m}</span></td>
+                  <td style="font-weight:700;color:var(--primary-400)">${amt}</td>
+                  <td><span class="pill ${s==='completed'?'pill-green':'pill-red'}">${s}</span></td>
+                  <td style="color:var(--text-tertiary);font-size:11px">${t}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    routes: () => `
+      <div class="stat-grid stat-grid-3 mb-5">
+        ${[['Active Routes','6','var(--primary-500)'],['Avg Daily Passengers','1,248','var(--primary-500)'],['Total Revenue/Day','RWF 980K','#1976D2']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value" style="font-size:${v.includes('RWF')?'18px':'24px'}">${v}</div></div>`).join('')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${[
+          ['R001','Nyabugogo → CBD','active',12.5,45,500,94,'350 avg/day'],
+          ['R002','CBD → Kimironko','active',8.2,30,400,88,'280 avg/day'],
+          ['R003','Nyamirambo → Remera','active',10.1,40,450,78,'210 avg/day'],
+          ['R004','Gisozi → Downtown','active',6.8,25,350,60,'148 avg/day'],
+          ['R005','Kacyiru → Airport','active',15.3,55,800,72,'98 avg/day'],
+          ['R006','Musanze Route','suspended',120,180,3500,0,'0 avg/day'],
+        ].map(([code,name,status,km,min,fare,occ,pax])=>`
+          <div class="card">
+            <div class="card-body" style="display:flex;align-items:center;gap:16px;padding:14px 18px;flex-wrap:wrap">
+              <div style="min-width:120px">
+                <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:2px">${code}</div>
+                <div style="font-size:13px;font-weight:700;color:var(--text-primary)">${name}</div>
+              </div>
+              <span class="pill ${status==='active'?'pill-green':'pill-red'}">${status}</span>
+              <div style="display:flex;gap:20px;flex:1;justify-content:center">
+                ${[[km+'km','Distance'],[min+' min','Est. Time'],['RWF '+fare,'Base Fare'],[pax,'Pax/Day']].map(([v,l])=>`
+                  <div style="text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text-primary)">${v}</div><div style="font-size:10px;color:var(--text-tertiary)">${l}</div></div>`).join('')}
+              </div>
+              <div style="min-width:100px">
+                <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:4px">Occupancy</div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:${occ}%;background:${occ>80?'var(--primary-500)':occ>60?'#fbbf24':'#f87171'}"></div></div>
+                <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">${occ}%</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-ghost btn-sm"><i class="fas fa-chart-bar"></i></button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`,
+
+    managers: () => `
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Management Team</div></div>
+          <div class="card-body" style="padding:8px 16px">
+            ${[
+              ['Patrick Habimana','Operations Manager','Operations · Routes 1-4','#1976D2','PH'],
+              ['Diane Uwimana','Fleet Manager','Fleet · Maintenance','#2E7D32','DU'],
+              ['Claude Nkurunziza','Finance Manager','Finance · Payroll','#7c3aed','CN'],
+            ].map(([n,title,dept,c,av])=>`
+              <div class="person-row">
+                <div class="avatar av-md" style="background:${c}">${av}</div>
+                <div class="person-info">
+                  <div class="person-name">${n}</div>
+                  <div style="font-size:11px;color:var(--primary-400);font-weight:600;margin-top:1px">${title}</div>
+                  <div class="person-meta">${dept}</div>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-ghost btn-sm"><i class="fas fa-key"></i></button>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Add Manager</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" placeholder="e.g. Alice Mukamana"></div>
+            <div class="form-group"><label class="form-label">Department</label>
+              <select class="form-input"><option>Operations</option><option>Fleet</option><option>Finance</option><option>HR</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" placeholder="manager@kigaliexpress.rw"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input class="form-input" placeholder="+250 7XX XXX XXX"></div>
+            <button class="btn btn-primary"><i class="fas fa-user-plus"></i> Create Manager + Login</button>
+          </div>
+        </div>
+      </div>`,
+
+    complaints: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Open','3','#dc2626'],['Investigating','2','#fbbf24'],['Resolved (MTD)','14','var(--primary-500)'],['Avg Resolution','1.8 days','#1976D2']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value" style="font-size:${v.includes('d')?'18px':'24px'}">${v}</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Passenger Complaints</div>
+          <select class="form-input" style="width:auto;font-size:12px;padding:6px 10px"><option>All Status</option><option>Open</option><option>Investigating</option><option>Resolved</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Trip</th><th>Severity</th><th>Status</th><th>Filed</th><th></th></tr></thead>
+            <tbody>
+              ${[
+                ['CMP-021','Driver Behavior','Driver was rude to passenger','KE-042','medium','open','Today'],
+                ['CMP-020','Late Arrival','Bus arrived 25min late','KE-044','low','investigating','Today'],
+                ['CMP-019','Overcharging','Charged RWF 700 instead of 500','KE-038','high','open','Yesterday'],
+                ['CMP-018','Safety Issue','Bus had faulty door','KE-034','critical','resolved','2 days ago'],
+              ].map(([id,type,desc,trip,sev,s,t])=>`
+                <tr>
+                  <td style="font-family:monospace;font-size:11px;font-weight:700">${id}</td>
+                  <td style="font-size:12px;font-weight:600">${type}</td>
+                  <td style="font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${desc}</td>
+                  <td style="font-size:12px">${trip}</td>
+                  <td><span class="pill ${sev==='critical'?'pill-red':sev==='high'?'pill-red':sev==='medium'?'pill-amber':'pill-green'}" style="font-size:10px">${sev}</span></td>
+                  <td><span class="pill ${s==='open'?'pill-red':s==='investigating'?'pill-amber':'pill-green'}">${s}</span></td>
+                  <td style="color:var(--text-tertiary);font-size:11px">${t}</td>
+                  <td><button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+  },
+
+  // ════════════════ RURA SUPER ADMIN ════════════════
+  rura: {
+    dashboard: () => `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+        ${[['Platform','var(--primary-500)'],['API','var(--primary-500)'],['Payments','var(--primary-500)'],['Bus Tracking','var(--primary-500)'],['Database','var(--primary-500)'],['License Alerts (4)','#fbbf24']].map(([l,c])=>`
+          <div style="display:flex;align-items:center;gap:6px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:${c}">
+            <div style="width:6px;height:6px;border-radius:50%;background:${c}"></div>${l}
+          </div>`).join('')}
+      </div>
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Companies','3','1 pending','#7c3aed'],['Trips Running','47','🟢 Live now','var(--primary-500)'],['Revenue Today','RWF 2.4M','↑ 12%','var(--primary-800)'],['Passengers Today','4,821','↑ 8%','#1976D2']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div>
+          <div class="stat-value" style="font-size:${v.includes('RWF')?'16px':'24px'}">${v}</div>
+          <div class="stat-sub">${s}</div></div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-chart-line" style="color:#7c3aed;margin-right:6px"></i>Platform Revenue — 30 Days</div></div>
+          <div class="card-body">
+            <svg class="chart-svg" viewBox="0 0 400 140" preserveAspectRatio="none">
+              <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed" stop-opacity=".25"/><stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,100 C20,80 40,90 60,70 S100,50 120,60 S160,30 180,40 S220,20 240,35 S280,15 300,25 S340,10 360,18 S380,8 400,12" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+              <path d="M0,100 C20,80 40,90 60,70 S100,50 120,60 S160,30 180,40 S220,20 240,35 S280,15 300,25 S340,10 360,18 S380,8 400,12 L400,140 L0,140Z" fill="url(#pg)"/>
+            </svg>
+            <div style="display:flex;gap:16px;margin-top:8px">
+              <span style="font-size:11px;color:var(--text-tertiary)">Peak: <strong style="color:var(--text-primary)">RWF 3.2M</strong> Friday</span>
+              <span style="font-size:11px;color:var(--text-tertiary)">Avg: <strong style="color:var(--text-primary)">RWF 1.8M</strong>/day</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-bolt" style="color:var(--primary-500);margin-right:6px"></i>Live Activity</div><span class="live-dot">Live</span></div>
+          <div class="card-body" style="padding:10px 14px">
+            ${[
+              ['fa-bus','var(--primary-500)','Trip KE-042 departed Nyabugogo','2m ago'],
+              ['fa-exclamation-triangle','#fbbf24','Incident filed — RAB 123B breakdown','5m ago'],
+              ['fa-credit-card','#60a5fa','Payment RWF 12,400 — MTN MoMo','7m ago'],
+              ['fa-user-check','var(--primary-500)','Driver Jean Claude clocked in','12m ago'],
+              ['fa-building','#a78bfa','Rwanda Metro added 2 new buses','18m ago'],
+            ].map(([ic,c,t,tm])=>`
+              <div class="feed-item">
+                <div class="feed-icon" style="background:${c}15"><i class="fas ${ic}" style="color:${c}"></i></div>
+                <div><div class="feed-text">${t}</div><div class="feed-time">${tm}</div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><i class="fas fa-building" style="color:#7c3aed;margin-right:6px"></i>Transport Companies</div><button class="btn btn-outline btn-sm">View All</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Company</th><th>Status</th><th>Buses</th><th>Trips Today</th><th>Revenue Today</th><th>Compliance</th><th>Tier</th><th></th></tr></thead>
+            <tbody>
+              ${[
+                ['Kigali Express Bus','active',12,18,'RWF 980K','✅ Good','premium'],
+                ['Rwanda Metro Transport','active',9,16,'RWF 820K','⚠️ 2 alerts','standard'],
+                ['Hills Bus Rwanda','pending_approval',6,13,'RWF 620K','✅ Good','basic'],
+              ].map(([n,s,b,t,r,c,tier])=>`
+                <tr>
+                  <td style="font-weight:700;color:var(--text-primary)">${n}</td>
+                  <td><span class="pill ${s==='active'?'pill-green':s==='pending_approval'?'pill-amber':'pill-red'}">${s}</span></td>
+                  <td>${b}</td><td>${t}</td>
+                  <td style="font-weight:700;color:var(--primary-400)">${r}</td>
+                  <td style="font-size:12px">${c}</td>
+                  <td><span class="pill pill-grey" style="font-size:10px">${tier}</span></td>
+                  <td><button class="btn btn-ghost btn-sm"><i class="fas fa-external-link-alt"></i></button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    expresses: () => `
+      <div class="stat-grid stat-grid-3 mb-5">
+        ${[['Active','2','var(--primary-500)'],['Pending Approval','1','#fbbf24'],['Suspended','0','#dc2626']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${[
+          {n:'Kigali Express Bus',r:'RWA-TRN-0012',s:'active',b:12,d:15,rt:6,rev:'RWF 14.2M',tier:'premium',since:'Jan 2023',c:'#4CAF50'},
+          {n:'Rwanda Metro Transport',s:'active',r:'RWA-TRN-0018',b:9,d:12,rt:4,rev:'RWF 9.8M',tier:'standard',since:'Mar 2023',c:'#1976D2'},
+          {n:'Hills Bus Rwanda',s:'pending_approval',r:'RWA-TRN-0025',b:6,d:8,rt:3,rev:'RWF 4.1M',tier:'basic',since:'Jan 2025',c:'#fbbf24'},
+        ].map(co=>`
+          <div class="card">
+            <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div style="width:44px;height:44px;border-radius:10px;background:${co.c}15;border:1px solid ${co.c}30;display:flex;align-items:center;justify-content:center;font-size:20px"><i class="fas fa-bus" style="color:${co.c}"></i></div>
+              <div style="flex:1;min-width:140px">
+                <div style="font-size:14px;font-weight:700;color:var(--text-primary)">${co.n}</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">${co.r} · Since ${co.since}</div>
+              </div>
+              ${[[co.b,'Buses'],[co.d,'Drivers'],[co.rt,'Routes']].map(([v,l])=>`<div style="text-align:center;min-width:50px"><div style="font-size:16px;font-weight:700;color:var(--text-primary)">${v}</div><div style="font-size:10px;color:var(--text-tertiary)">${l}</div></div>`).join('')}
+              <div style="min-width:80px;text-align:right"><div style="font-size:13px;font-weight:700;color:var(--primary-400)">${co.rev}</div><div style="font-size:10px;color:var(--text-tertiary)">Revenue MTD</div></div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+                <span class="pill ${co.s==='active'?'pill-green':'pill-amber'}">${co.s}</span>
+                <span class="pill pill-grey" style="font-size:10px">${co.tier}</span>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i> View</button>
+                <button class="btn btn-danger btn-sm"><i class="fas fa-ban"></i> Suspend</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`,
+
+    compliance: () => `
+      <div class="alert alert-danger mb-5">
+        <i class="fas fa-shield-alt"></i>
+        <span><strong>4 compliance issues</strong> require immediate attention — 2 license expirations and 2 insurance renewals overdue.</span>
+      </div>
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Critical','2','#dc2626'],['Warnings','4','#fbbf24'],['OK','18','var(--primary-500)'],['Compliance Score','87%','var(--primary-500)']].map(([l,v,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value" style="color:${c==='#dc2626'||c==='#fbbf24'?c:'var(--text-primary)'}">${v}</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><i class="fas fa-shield-alt" style="color:#7c3aed;margin-right:6px"></i>Compliance Issues</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Company</th><th>Issue Type</th><th>Entity</th><th>Expiry / Due Date</th><th>Days Remaining</th><th>Severity</th><th></th></tr></thead>
+            <tbody>
+              ${[
+                ['Kigali Express Bus','Driver License','Emmanuel Kayumba','Mar 18, 2026','12 days','high'],
+                ['Rwanda Metro Transport','Bus Insurance','RAB 334D','Mar 10, 2026','4 days','critical'],
+                ['Rwanda Metro Transport','Vehicle Inspection','RAB 221B','Apr 1, 2026','26 days','medium'],
+                ['Hills Bus Rwanda','Company License','Company','May 15, 2026','70 days','low'],
+              ].map(([co,type,entity,exp,days,sev])=>`
+                <tr>
+                  <td style="font-weight:600;color:var(--text-primary)">${co}</td>
+                  <td style="font-size:12px">${type}</td>
+                  <td style="font-size:12px;color:var(--text-tertiary)">${entity}</td>
+                  <td style="font-family:monospace;font-size:12px">${exp}</td>
+                  <td style="font-weight:700;color:${parseInt(days)<10?'#f87171':parseInt(days)<30?'#fbbf24':'var(--primary-400)'}">${days}</td>
+                  <td><span class="pill ${sev==='critical'?'pill-red':sev==='high'?'pill-red':sev==='medium'?'pill-amber':'pill-green'}" style="font-size:10px">${sev}</span></td>
+                  <td><button class="btn btn-ghost btn-sm"><i class="fas fa-paper-plane"></i> Notify</button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    analytics: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Platform On-Time','87%','↑ 3%','var(--primary-500)'],['Avg Occupancy','74%','↑ 5%','var(--primary-500)'],['Incidents/Week','2.1','↓ 0.8','#1976D2'],['Cancellation Rate','1.4%','↓ 0.3%','#dc2626']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value">${v}</div>
+          <div class="stat-badge ${s.startsWith('↑')?'badge-up':s.startsWith('↓')&&l.includes('Incident')?'badge-up':'badge-down'}"><i class="fas ${s.startsWith('↑')?'fa-arrow-up':'fa-arrow-down'}"></i> ${s}</div></div>`).join('')}
+      </div>
+      <div class="grid-2 mb-5">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Company Revenue Comparison</div></div>
+          <div class="card-body">
+            ${[['Kigali Express Bus','RWF 14.2M',72,'var(--primary-500)'],['Rwanda Metro Transport','RWF 9.8M',50,'#1976D2'],['Hills Bus Rwanda','RWF 4.1M',21,'#a78bfa']].map(([n,v,pct,c])=>`
+              <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;font-weight:600">${n}</span>
+                  <span style="font-size:12px;font-weight:700;color:${c}">${v}</span>
+                </div>
+                <div class="progress-wrap" style="height:8px"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top Driver Rankings (Platform)</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Driver</th><th>Rating</th><th>On-Time</th><th>Company</th></tr></thead>
+              <tbody>
+                ${[['1','Jean Claude N.','⭐ 4.9','96%','KEB'],['2','Claudette U.','⭐ 4.8','93%','RMT'],['3','Patrick B.','⭐ 4.7','91%','KEB'],['4','Alice Ingabire','⭐ 4.7','90%','HBR']].map(([r,n,rt,ot,co])=>`
+                  <tr><td style="font-weight:700;color:var(--primary-400)">${r}</td><td style="font-weight:600;color:var(--text-primary)">${n}</td><td>${rt}</td><td style="font-weight:700;color:var(--primary-400)">${ot}</td><td><span class="pill pill-grey" style="font-size:10px">${co}</span></td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>`,
+
+    announcements: () => `
+      <div class="grid-2">
+        <div>
+          <div class="card mb-5">
+            <div class="card-header"><div class="card-title">Create Announcement</div></div>
+            <div class="card-body">
+              <div class="form-group"><label class="form-label">Title</label><input class="form-input" placeholder="Announcement title..."></div>
+              <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" placeholder="Write announcement..."></textarea></div>
+              <div class="form-group"><label class="form-label">Target</label>
+                <select class="form-input"><option>All Passengers + Companies</option><option>Passengers Only</option><option>Companies Only</option><option>Specific Company</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Severity</label>
+                <select class="form-input"><option>Info</option><option>Warning</option><option>Critical</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Expires</label><input class="form-input" type="date"></div>
+              <button class="btn btn-primary"><i class="fas fa-bullhorn"></i> Publish Announcement</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Active Announcements</div></div>
+          <div class="card-body" style="padding:0">
+            ${[
+              ['Route R006 suspended until April 2026','warning','All Passengers','Expires Apr 1'],
+              ['System maintenance: Sunday 2–4 AM','info','All','Expires Mar 8'],
+              ['New fare structure effective March 1','info','All Passengers','Expires Mar 31'],
+            ].map(([t,type,target,exp])=>`
+              <div style="padding:14px 18px;border-bottom:1px solid var(--border-color)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+                  <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${t}</div>
+                  <span class="pill ${type==='warning'?'pill-amber':'pill-blue'}" style="font-size:10px;flex-shrink:0">${type}</span>
+                </div>
+                <div style="display:flex;gap:12px;font-size:11px;color:var(--text-tertiary)">
+                  <span><i class="fas fa-users"></i> ${target}</span>
+                  <span><i class="fas fa-clock"></i> ${exp}</span>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:8px">
+                  <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i> Edit</button>
+                  <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+
+    users: () => `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Portal Users</div>
+          <div style="display:flex;gap:8px">
+            <select class="form-input" style="width:auto;font-size:12px;padding:6px 10px"><option>All Roles</option><option>Admin</option><option>Manager</option><option>Driver</option><option>Worker</option></select>
+            <input class="form-input" style="width:180px;font-size:12px;padding:7px 12px" placeholder="🔍 Search...">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Role</th><th>Company</th><th>Username</th><th>Last Login</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              ${[
+                ['Diane Uwase','Admin','Kigali Express Bus','diane.uwase','Today 08:22','active','#2E7D32'],
+                ['Patrick Habimana','Manager','Kigali Express Bus','p.habimana','Today 07:45','active','#1976D2'],
+                ['Jean Claude Nkusi','Driver','Kigali Express Bus','jean.claude','Today 06:30','active','#4CAF50'],
+                ['Alice Uwimana','Admin','Rwanda Metro','alice.uwimana','Yesterday','active','#2E7D32'],
+                ['Robert Nkusi','Manager','Rwanda Metro','r.nkusi','2 days ago','active','#1976D2'],
+                ['Emmanuel Kayumba','Driver','Hills Bus Rwanda','e.kayumba','3 days ago','suspended','#7c3aed'],
+              ].map(([n,role,co,user,ll,s,c])=>`
+                <tr>
+                  <td><div style="display:flex;align-items:center;gap:8px">
+                    <div class="avatar av-sm" style="background:${c}">${n[0]}</div>
+                    <span style="font-weight:600;color:var(--text-primary)">${n}</span>
+                  </div></td>
+                  <td><span class="pill ${role==='Admin'?'pill-green':role==='Manager'?'pill-blue':role==='Driver'?'pill-green':'pill-grey'}" style="font-size:10px">${role}</span></td>
+                  <td style="font-size:12px;color:var(--text-tertiary)">${co}</td>
+                  <td style="font-family:monospace;font-size:12px">${user}</td>
+                  <td style="font-size:11px;color:var(--text-tertiary)">${ll}</td>
+                  <td><span class="pill ${s==='active'?'pill-green':'pill-red'}">${s}</span></td>
+                  <td><div style="display:flex;gap:6px">
+                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-ghost btn-sm"><i class="fas fa-key"></i></button>
+                  </div></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+
+    feedback: () => `
+      <div class="stat-grid stat-grid-4 mb-5">
+        ${[['Total Feedback','248','This month','var(--primary-500)'],['Avg Rating','4.2 / 5','Platform-wide','var(--primary-500)'],['Positive','76%','4–5 stars','var(--primary-500)'],['Negative','8%','1–2 stars','#dc2626']].map(([l,v,s,c])=>`
+          <div class="stat-card" style="--card-accent:${c}"><div class="stat-label">${l}</div><div class="stat-value" style="font-size:${v.includes('/')?'18px':'24px'}">${v}</div><div class="stat-sub">${s}</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Passenger Feedback</div></div>
+        <div class="card-body" style="padding:0">
+          ${[
+            ['Alice M.','⭐⭐⭐⭐⭐','Jean Claude N.','Great driver, very punctual and helpful!','Kigali Express Bus','2h ago'],
+            ['Robert N.','⭐⭐⭐','Patrick B.','Bus was a bit late but driver was friendly','Rwanda Metro','5h ago'],
+            ['Marie I.','⭐⭐','Unknown','Overcharged! Paid RWF 700 for a RWF 500 trip','Hills Bus Rwanda','Today 08:00'],
+            ['Grace M.','⭐⭐⭐⭐','Claudette U.','Clean bus and on-time. Good experience.','Kigali Express Bus','Yesterday'],
+          ].map(([name,stars,driver,comment,co,t])=>`
+            <div style="padding:14px 18px;border-bottom:1px solid var(--border-color)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                <div class="avatar av-sm" style="background:var(--bg-tertiary);color:var(--text-secondary)">${name[0]}</div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text-primary)">${name}</div><div style="font-size:11px;color:var(--text-tertiary)">${co} · ${t}</div></div>
+                <div>${stars}</div>
+              </div>
+              <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">"${comment}"</div>
+              <div style="font-size:11px;color:var(--text-tertiary)"><i class="fas fa-user"></i> Driver: ${driver}</div>
+            </div>`).join('')}
+        </div>
+      </div>`,
+  },
+}
+
+// ─── BOOT ────────────────────────────────────────
+renderAll()
+</script>
+</body>
+</html>
