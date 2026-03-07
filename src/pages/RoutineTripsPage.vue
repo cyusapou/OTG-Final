@@ -487,8 +487,10 @@ html.dark .routine-card.today {
 }
 
 .routine-icon {
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -770,8 +772,8 @@ html.dark .btn-book-now:hover {
   background: #FFF;
   border-radius: 16px;
   width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
+  max-width: min(480px, 90vw);
+  max-height: min(90vh, 85vh);
   overflow-y: auto;
 }
 
@@ -807,8 +809,10 @@ html.dark .modal-header h2 {
 }
 
 .btn-close {
-  width: 32px;
-  height: 32px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: none;
   background: #F5F5F5;
@@ -876,8 +880,10 @@ html.dark .form-input:focus, html.dark .form-select:focus {
 }
 
 .day-btn {
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid #E8E8E8;
   background: #FFF;
@@ -989,5 +995,13 @@ html.dark .error-banner {
 
 html.dark .error-banner button {
   background: #EF4444;
+}
+
+/* Phone breakpoint */
+@media (max-width: 480px) {
+  .page-container { padding: 12px; }
+  .modal-overlay { padding: 12px; }
+  .modal { max-width: 90vw; max-height: 85vh; }
+  .modal-small { max-width: 90vw; }
 }
 </style>

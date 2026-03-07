@@ -184,8 +184,10 @@ onMounted(loadBooking)
   margin: 0;
 }
 .btn-back {
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   border: none;
   background: var(--card-bg, #141414);
@@ -323,4 +325,14 @@ onMounted(loadBooking)
 .btn-share:hover { background: rgba(255,255,255,0.05); }
 
 html.dark .booking-detail { background: #0a0a0a; }
+
+@media (max-width: 480px) {
+  .qr-box { max-width: 240px; max-height: 240px; width: 240px; height: 240px; }
+  .booking-detail { padding: 16px; }
+  .detail-header { margin-bottom: 20px; gap: 12px; }
+  .qr-section { padding: 20px 16px; }
+  .detail-rows { padding: 0 16px 16px; }
+  .detail-row { padding: 12px 0; }
+  .actions { margin-top: 16px; gap: 10px; }
+}
 </style>

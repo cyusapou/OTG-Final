@@ -347,8 +347,8 @@ const selectTrip = (trip) => {
   display: block;
 }
 
-/* Desktop sidebar spacing */
-@media (min-width: 1024px) {
+/* Desktop sidebar spacing - hidden at 768px+ */
+@media (min-width: 768px) {
   .mobile-lang-toggle {
     display: none;
   }
@@ -359,8 +359,8 @@ const selectTrip = (trip) => {
   flex-direction: column;
 }
 
-/* Desktop: Side filters */
-@media (min-width: 1024px) {
+/* Desktop: Side filters - 768px+ */
+@media (min-width: 768px) {
   .trips-layout {
     flex-direction: row;
   }
@@ -388,7 +388,7 @@ const selectTrip = (trip) => {
   display: block;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .filters-sidebar {
     position: fixed;
     left: 0;
@@ -420,6 +420,12 @@ const selectTrip = (trip) => {
 }
 
 .clear-filters {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: #2E7D32;
@@ -451,6 +457,8 @@ const selectTrip = (trip) => {
 }
 
 .pill {
+  min-height: 44px;
+  min-width: 44px;
   padding: 8px 14px;
   border-radius: 20px;
   border: 1px solid #E8E8E8;
@@ -481,6 +489,8 @@ const selectTrip = (trip) => {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 8px 14px;
   border-radius: 8px;
   border: 1px solid #E8E8E8;
@@ -507,6 +517,7 @@ const selectTrip = (trip) => {
 
 .seat-select {
   width: 100%;
+  min-height: 44px;
   padding: 10px 14px;
   border: 1.5px solid #E8E8E8;
   border-radius: 8px;
@@ -530,7 +541,7 @@ const selectTrip = (trip) => {
   padding: 20px;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .screen {
     max-width: 800px;
     margin: 0 auto;
@@ -552,15 +563,17 @@ const selectTrip = (trip) => {
   color: #212121;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .header h2 {
     font-size: 22px;
   }
 }
 
 .btn-back {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 8px;
   border: 1px solid #E8E8E8;
   background: #FFF;
@@ -633,7 +646,10 @@ const selectTrip = (trip) => {
 .filter-toggle-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 12px 16px;
   border-radius: 8px;
   border: 1.5px solid #E8E8E8;
@@ -649,7 +665,7 @@ const selectTrip = (trip) => {
   border-color: #2E7D32;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .filter-toggle-btn {
     display: none;
   }
@@ -711,6 +727,8 @@ const selectTrip = (trip) => {
 }
 
 .banner-close {
+  min-width: 44px;
+  min-height: 44px;
   background: transparent;
   border: none;
   color: #558B2F;
@@ -718,6 +736,9 @@ const selectTrip = (trip) => {
   cursor: pointer;
   padding: 4px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: color 0.2s ease;
 }
 
@@ -776,8 +797,10 @@ const selectTrip = (trip) => {
 }
 
 .express-logo-sm {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   background: #E8F5E9;
   border-radius: 50%;
   display: flex;
@@ -787,7 +810,7 @@ const selectTrip = (trip) => {
 
 .express-logo-sm i {
   color: #2E7D32;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .trip-express span {
@@ -930,8 +953,8 @@ const selectTrip = (trip) => {
   background: #1B5E20;
 }
 
-/* Mobile adjustments */
-@media (max-width: 600px) {
+/* Mobile adjustments - align with 768px layout breakpoint */
+@media (max-width: 767px) {
   .mobile-lang-toggle {
     position: fixed;
     top: 12px;
@@ -950,7 +973,7 @@ const selectTrip = (trip) => {
 }
 
 /* Bottom nav spacing on mobile */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .page-wrapper {
     padding-bottom: 70px;
   }
@@ -1015,7 +1038,7 @@ html.dark .banner-close:hover { color: var(--text, rgba(255,255,255,0.85)); }
 html.dark .pill.active { background: var(--green, #22c55e); border-color: var(--green, #22c55e); }
 html.dark .chip.active { color: var(--green, #22c55e); border-color: var(--green, #22c55e); }
 html.dark .filter-badge { background: var(--green, #22c55e); }
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   html.dark .filters-sidebar { box-shadow: 0 -4px 12px rgba(0,0,0,0.4); border-color: var(--border, rgba(255,255,255,0.07)); }
 }
 </style>

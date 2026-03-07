@@ -602,12 +602,7 @@ const formatDate = (dateStr) => {
   display: block;
 }
 
-/* Desktop sidebar spacing */
-@media (min-width: 1024px) {
-  .page-wrapper {
-    margin-left: 220px;
-  }
-  
+@media (min-width: 768px) {
   .mobile-lang-toggle {
     display: none;
   }
@@ -653,8 +648,10 @@ html.dark .header h2 {
 }
 
 .btn-back {
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid #E8E8E8;
   background: #FFF;
@@ -734,8 +731,10 @@ html.dark .payment-card.selected {
 }
 
 .payment-icon {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   background: #E8F5E9;
   border-radius: 10px;
   display: flex;
@@ -1421,6 +1420,27 @@ html.dark .payment-icon i {
     top: 12px;
     right: 12px;
     z-index: 100;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-methods-grid {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-methods-grid {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-methods-grid {
+    display: flex;
+    flex-direction: column;
   }
 }
 

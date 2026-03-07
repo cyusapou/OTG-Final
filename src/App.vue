@@ -98,7 +98,7 @@ const updateDarkModeClass = () => {
   padding-bottom: 0;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .main-content {
     margin-left: 220px;
     padding-bottom: 0;

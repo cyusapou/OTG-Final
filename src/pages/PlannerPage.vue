@@ -891,4 +891,28 @@ html.dark .error-banner {
 html.dark .error-banner button {
   background: #EF4444;
 }
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .form-row,
+  .trip-type-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-back {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.day-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (min-width: 768px) {
+  .mobile-lang-toggle {
+    display: none !important;
+  }
+}
 </style>

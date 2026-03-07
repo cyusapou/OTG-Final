@@ -147,12 +147,7 @@ const formatDate = (dateStr) => {
   display: block;
 }
 
-/* Desktop sidebar spacing */
-@media (min-width: 1024px) {
-  .page-wrapper {
-    margin-left: 220px;
-  }
-  
+@media (min-width: 768px) {
   .mobile-lang-toggle {
     display: none;
   }
@@ -194,8 +189,10 @@ const formatDate = (dateStr) => {
 }
 
 .btn-back {
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid #E8E8E8;
   background: #FFF;
@@ -243,8 +240,10 @@ const formatDate = (dateStr) => {
 }
 
 .express-logo-sm {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   background: #E8F5E9;
   border-radius: 50%;
   display: flex;
@@ -411,7 +410,9 @@ const formatDate = (dateStr) => {
     right: 12px;
     z-index: 100;
   }
-  
+}
+
+@media (max-width: 480px) {
   .quick-actions {
     flex-direction: column;
   }

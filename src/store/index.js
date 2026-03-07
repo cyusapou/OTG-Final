@@ -85,7 +85,7 @@ export const store = reactive({
   
   // UI state
   currentLang: 'en',
-  darkMode: typeof window !== 'undefined' ? (localStorage.getItem('darkMode') !== 'false') : true,
+  darkMode: typeof window !== 'undefined' ? (localStorage.getItem('darkMode') === 'true') : false,
   showTicket: false,
   isProcessing: false,
   stopCode: '',

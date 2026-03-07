@@ -446,6 +446,7 @@ onUnmounted(() => {
   min-height: 100vh;
   background: var(--gradient-hero);
   padding-bottom: 80px;
+  overflow-x: hidden;
 }
 
 .track-container {
@@ -463,8 +464,10 @@ onUnmounted(() => {
 }
 
 .btn-back {
-  width: 42px;
-  height: 42px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -520,7 +523,7 @@ onUnmounted(() => {
   background: transparent;
   color: var(--text-tertiary);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   transition: all 0.25s;
   text-transform: uppercase;
@@ -558,8 +561,10 @@ onUnmounted(() => {
 }
 
 .section-icon {
-  width: 44px;
-  height: 44px;
+  min-width: 48px;
+  min-height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -714,7 +719,7 @@ html.dark .stop-card.selected {
   flex-shrink: 0;
 }
 
-.stop-details { flex: 1; min-width: 0; }
+.stop-details { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
 
 .stop-details h4 {
   font-size: 14px;
@@ -814,7 +819,7 @@ html.dark .bus-card:hover {
   flex-shrink: 0;
 }
 
-.bus-details { flex: 1; min-width: 0; }
+.bus-details { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
 .bus-details h4 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0; }
 .bus-route { font-size: 12px; color: var(--text-secondary); margin: 2px 0 4px; }
 
@@ -889,7 +894,7 @@ html.dark .map-action-btn:hover {
   border-top: 1px solid var(--border-color);
 }
 
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .map-wrapper { min-height: 320px; }
 }
 
@@ -1044,14 +1049,14 @@ html.dark .saved-icon.stop { background: rgba(123,31,162,0.15); }
 }
 
 /* Mobile */
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .track-container { padding: 0 12px; }
   .track-header { padding: 16px 0 10px; }
   .track-header h1 { font-size: 20px; }
   .section-card { padding: 18px; border-radius: 14px; }
-  .tab-btn span { font-size: 9px; }
+  .tab-btn span { font-size: 11px; }
   .tab-btn i { font-size: 14px; }
-  .tab-btn { padding: 8px 6px; }
+  .tab-btn { padding: 8px 6px; font-size: 12px; }
 }
 
 /* Animation */

@@ -57,7 +57,7 @@ watch(() => route.path, () => {})
   padding: 16px;
   background: #FFF;
   border-bottom: 1px solid #E8E8E8;
-  overflow-x: auto;
+  overflow: hidden;
   max-width: 960px;
   margin: 0 auto;
 }
@@ -75,8 +75,8 @@ html.dark .step-progress {
 }
 
 .step-circle {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #F5F5F5;
   color: #757575;
@@ -117,7 +117,7 @@ html.dark .step.completed .step-circle {
 .checkmark { font-size: 14px; }
 
 .step-label {
-  font-size: 11px;
+  font-size: 12px;
   color: #757575;
   white-space: nowrap;
   font-weight: 500;
@@ -171,7 +171,7 @@ html.dark .step.completed .step-line {
 
 @media (min-width: 1024px) {
   .step-progress { padding: 20px 24px; }
-  .step-circle { width: 32px; height: 32px; font-size: 14px; }
+  .step-circle { width: 40px; height: 40px; font-size: 14px; }
   .step-label { font-size: 13px; }
   .step-line { width: 40px; }
 }

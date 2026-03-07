@@ -150,7 +150,7 @@ html.dark .page-wrapper {
 }
 
 /* Desktop sidebar spacing */
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .mobile-lang-toggle {
     display: none;
   }
@@ -165,7 +165,7 @@ html.dark .page-wrapper {
 }
 
 /* Desktop: Add padding */
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .screen {
     padding: 24px;
   }
@@ -190,15 +190,17 @@ html.dark .header h2 {
 }
 
 /* Desktop: Larger header */
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .header h2 {
     font-size: 22px;
   }
 }
 
 .btn-back {
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid #E8E8E8;
   background: #FFF;
@@ -296,7 +298,7 @@ html.dark .search-input:focus {
   border: none;
   color: #757575;
   cursor: pointer;
-  padding: 4px;
+  padding: 12px;
 }
 
 html.dark .clear-search {
@@ -318,14 +320,16 @@ html.dark .clear-search:hover {
   margin-bottom: 0;
 }
 
-@media (min-width: 768px) {
+/* Tablet: 2 columns */
+@media (min-width: 480px) {
   .express-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 }
 
-@media (min-width: 1024px) {
+/* Desktop: 3 columns */
+@media (min-width: 768px) {
   .express-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
@@ -419,7 +423,7 @@ html.dark .express-info p {
 }
 
 /* Desktop: Larger cards */
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .express-card {
     padding: 20px;
   }
@@ -506,7 +510,7 @@ html.dark .btn-retry {
 }
 
 /* Mobile adjustments */
-@media (max-width: 499px) {
+@media (max-width: 767px) {
   .mobile-lang-toggle {
     position: fixed;
     top: 12px;

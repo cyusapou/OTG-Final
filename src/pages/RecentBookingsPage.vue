@@ -710,7 +710,7 @@ export default {
 
 .bookings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
   gap: 20px;
 }
 
@@ -844,6 +844,8 @@ export default {
 
 .btn {
   padding: 8px 16px;
+  min-height: 44px;
+  min-width: 44px;
   border: none;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -953,6 +955,11 @@ export default {
   font-size: 1.5rem;
   cursor: pointer;
   color: #666;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-body {
@@ -1077,9 +1084,41 @@ export default {
     flex-direction: column;
   }
   
+  .action-buttons .btn {
+    width: 100%;
+  }
+  
   .modal-content {
     width: 95%;
     margin: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookings-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .search-controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .bookings-content {
+    padding: 15px;
+  }
+  
+  .search-section {
+    padding: 15px;
+  }
+  
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .page-header p {
+    font-size: 0.95rem;
   }
 }
 
