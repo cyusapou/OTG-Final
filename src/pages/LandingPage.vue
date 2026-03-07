@@ -1,8 +1,5 @@
 <template>
   <div class="landing-page">
-    <div class="mobile-lang-toggle">
-      <LanguageToggle />
-    </div>
 
     <div class="hero-wrapper">
       <div class="hero-section">

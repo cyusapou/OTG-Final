@@ -170,23 +170,20 @@
               <i class="fas fa-crosshairs"></i>
               <span>Find Me</span>
             </button>
-            <button class="map-action-btn" v-if="mapUserLocation" @click="centerMapOnUser">
-              <i class="fas fa-location-arrow"></i>
-              <span>Center</span>
-            </button>
-            <button class="map-action-btn" v-if="showMapRoute" @click="clearMapRoute">
-              <i class="fas fa-times"></i>
-              <span>Clear Route</span>
-            </button>
-            <button class="map-action-btn" @click="resetMapView">
-              <i class="fas fa-sync-alt"></i>
-              <span>Reset</span>
-            </button>
           </div>
 
           <!-- Map container -->
           <div class="map-wrapper">
-            <BusMapFeature ref="busMapRef" />
+            <iframe
+              class="map-iframe"
+              :src="mapEmbedUrl"
+              width="100%"
+              height="100%"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
 
           <!-- Route info bar -->
@@ -267,14 +264,12 @@ import { useRouter } from 'vue-router'
 import { store } from '../store/index.js'
 import { translations } from '../translations/index.js'
 import { findNearestStops } from '../composables/useLocationUtils.js'
-import BusMapFeature from '../components/BusMapFeature.vue'
 
 const router = useRouter()
 const currentLang = computed(() => store.currentLang)
 const t = computed(() => translations[currentLang.value])
 
 const activeTab = ref('nearest')
-const busMapRef = ref(null)
 const nearbyStops = ref([])
 const selectedStop = ref(null)
 const isFindingNearest = ref(false)
@@ -299,6 +294,41 @@ const tabs = computed(() => [
   { id: 'saved', icon: 'fas fa-bookmark', label: t.value.trackedStations || 'Saved' },
 ])
 
+// Build a Google Maps embed URL without using the JS API or API key.
+// - If we have user location + selected stop: show directions from user -> stop
+// - If only stop: center map on stop
+// - Fallback: Kigali, Rwanda
+const mapEmbedUrl = computed(() => {
+  const base = 'https://www.google.com/maps'
+
+  const stationLat =
+    selectedStop.value?.coordinates?.lat ??
+    selectedStop.value?.latitude ??
+    null
+  const stationLng =
+    selectedStop.value?.coordinates?.lng ??
+    selectedStop.value?.longitude ??
+    null
+
+  const userLat = mapUserLocation.value?.lat ?? null
+  const userLng = mapUserLocation.value?.lng ?? null
+
+  // User + station → show directions-style query
+  if (userLat != null && userLng != null && stationLat != null && stationLng != null) {
+    const q = `${userLat},${userLng} to ${stationLat},${stationLng}`
+    return `${base}?q=${encodeURIComponent(q)}&output=embed`
+  }
+
+  // Station only
+  if (stationLat != null && stationLng != null) {
+    const q = `${stationLat},${stationLng}`
+    return `${base}?q=${encodeURIComponent(q)}&z=15&output=embed`
+  }
+
+  // Fallback – center on Kigali
+  return `${base}?q=${encodeURIComponent('Kigali, Rwanda')}&z=12&output=embed`
+})
+
 const goBack = () => router.back()
 
 const handleFindNearest = async () => {
@@ -308,8 +338,8 @@ const handleFindNearest = async () => {
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
+        timeout: 10000,
+        maximumAge: 0,
       })
     })
 
@@ -393,25 +423,6 @@ const handleFindNearestFromMap = async () => {
   await handleFindNearest()
   if (selectedStop.value) {
     showMapRoute.value = true
-  }
-}
-
-const centerMapOnUser = () => {
-  if (busMapRef.value) {
-    busMapRef.value.centerOnUser()
-  }
-}
-
-const clearMapRoute = () => {
-  showMapRoute.value = false
-  if (busMapRef.value) {
-    busMapRef.value.clearRoute()
-  }
-}
-
-const resetMapView = () => {
-  if (busMapRef.value) {
-    busMapRef.value.resetView()
   }
 }
 
@@ -890,12 +901,23 @@ html.dark .map-action-btn:hover {
 .map-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .map-wrapper {
-  min-height: 400px;
+  width: 100%;
   border-top: 1px solid var(--border-color);
 }
 
-@media (max-width: 768px) {
-  .map-wrapper { min-height: 320px; }
+.map-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 280px;
+  border: 0;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .map-iframe {
+    aspect-ratio: 16 / 9;
+    min-height: 360px;
+  }
 }
 
 .route-info-bar {

@@ -1,9 +1,6 @@
 <template>
   <div class="page-wrapper bg-white dark:bg-neutral-950 transition-colors">
     <!-- Mobile: Language toggle -->
-    <div class="mobile-lang-toggle">
-      <LanguageToggle />
-    </div>
 
     <StepProgress />
     

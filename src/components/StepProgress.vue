@@ -1,20 +1,16 @@
 <template>
   <div class="step-progress">
-    <div 
-      v-for="(step, index) in steps" 
-      :key="index"
-      :class="['step', { 
-        active: currentStep === index + 1,
-        completed: currentStep > index + 1
-      }]"
-    >
-      <div class="step-circle">
-        <span v-if="currentStep > index + 1" class="checkmark"><i class="fas fa-check"></i></span>
-        <span v-else>{{ index + 1 }}</span>
+    <template v-for="(step, index) in steps" :key="index">
+      <div :class="['step', { active: currentStep === index + 1, completed: currentStep > index + 1 }]">
+        <div class="step-circle">
+          <i v-if="currentStep > index + 1" class="fas fa-check"></i>
+          <span v-else>{{ index + 1 }}</span>
+        </div>
+        <span class="step-label">{{ step }}</span>
       </div>
-      <span class="step-label">{{ step }}</span>
-      <div v-if="index < steps.length - 1" class="step-line"></div>
-    </div>
+      <div v-if="index < steps.length - 1"
+        :class="['step-line', { done: currentStep > index + 1 }]" />
+    </template>
   </div>
 </template>
 
@@ -53,11 +49,9 @@ watch(() => route.path, () => {})
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  padding: 16px;
+  padding: 12px 8px;
   background: #FFF;
   border-bottom: 1px solid #E8E8E8;
-  overflow: hidden;
   max-width: 960px;
   margin: 0 auto;
 }
@@ -69,22 +63,24 @@ html.dark .step-progress {
 
 .step {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  position: relative;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .step-circle {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: #F5F5F5;
-  color: #757575;
+  background: #f0f0f0;
+  color: #9e9e9e;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   flex-shrink: 0;
   transition: all 0.3s ease;
 }
@@ -95,84 +91,88 @@ html.dark .step-circle {
 }
 
 .step.active .step-circle {
-  background: #2E7D32;
-  color: #FFF;
-}
-
-html.dark .step.active .step-circle {
-  background: var(--green);
+  background: #22c55e;
   color: #fff;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
 .step.completed .step-circle {
-  background: #2E7D32;
-  color: #FFF;
+  background: #22c55e;
+  color: #fff;
 }
 
+html.dark .step.active .step-circle,
 html.dark .step.completed .step-circle {
   background: var(--green);
   color: #fff;
 }
 
-.checkmark { font-size: 14px; }
+.step-circle i { font-size: 11px; }
 
 .step-label {
-  font-size: 12px;
-  color: #757575;
-  white-space: nowrap;
+  font-size: 10px;
+  color: #9e9e9e;
   font-weight: 500;
-  transition: color 0.3s ease;
+  text-align: center;
+  max-width: 60px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-html.dark .step-label {
-  color: var(--text-muted);
-}
+html.dark .step-label { color: var(--text-muted); }
 
 .step.active .step-label {
-  color: #2E7D32;
-  font-weight: 600;
-}
-
-html.dark .step.active .step-label {
-  color: var(--text);
-  font-weight: 600;
+  color: #22c55e;
+  font-weight: 700;
 }
 
 .step.completed .step-label {
-  color: #2E7D32;
+  color: #22c55e;
 }
 
+html.dark .step.active .step-label,
 html.dark .step.completed .step-label {
-  color: var(--text);
+  color: var(--green);
 }
 
 .step-line {
-  width: 24px;
+  flex: 1;
   height: 2px;
-  background: #E8E8E8;
-  margin: 0 8px;
-  flex-shrink: 0;
+  min-width: 12px;
+  max-width: 48px;
+  background: #e0e0e0;
+  border-radius: 1px;
+  margin: 0 4px;
+  align-self: center;
+  margin-bottom: 18px;
   transition: background 0.4s ease;
 }
 
-html.dark .step-line {
-  background: rgba(255, 255, 255, 0.15);
+html.dark .step-line { background: rgba(255, 255, 255, 0.1); }
+
+.step-line.done {
+  background: #22c55e;
 }
 
-.step.completed + .step .step-line,
-.step.completed .step-line {
-  background: #2E7D32;
+html.dark .step-line.done { background: var(--green); }
+
+/* Tablet+ */
+@media (min-width: 480px) {
+  .step-progress { padding: 14px 16px; }
+  .step-circle { width: 32px; height: 32px; font-size: 12px; }
+  .step-circle i { font-size: 12px; }
+  .step-label { font-size: 11px; max-width: 80px; }
+  .step-line { min-width: 20px; max-width: 60px; margin: 0 6px; }
 }
 
-html.dark .step.completed + .step .step-line,
-html.dark .step.completed .step-line {
-  background: var(--green);
-}
-
-@media (min-width: 1024px) {
-  .step-progress { padding: 20px 24px; }
-  .step-circle { width: 40px; height: 40px; font-size: 14px; }
-  .step-label { font-size: 13px; }
-  .step-line { width: 40px; }
+/* Desktop */
+@media (min-width: 768px) {
+  .step-progress { padding: 16px 24px; }
+  .step-circle { width: 36px; height: 36px; font-size: 13px; }
+  .step-circle i { font-size: 13px; }
+  .step-label { font-size: 12px; max-width: 100px; white-space: normal; }
+  .step-line { min-width: 32px; max-width: 80px; margin: 0 8px; margin-bottom: 22px; }
 }
 </style>
