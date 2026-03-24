@@ -1,7 +1,7 @@
 <template>
   <div class="bus-map-feature">
     <!-- Map Container -->
-    <div style="height: 500px; width: 100%;">
+    <div class="map-container">
       <l-map
         ref="mapRef"
         :zoom="zoom"
@@ -462,14 +462,27 @@ defineExpose({
   width: 100%;
 }
 
+.map-container {
+  height: 500px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    height: 400px;
+  }
+}
+
 .control-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--bg-secondary, #f8f9fa);
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-color, #e9ecef);
 }
 
 /* Search Section */
@@ -488,10 +501,11 @@ defineExpose({
 .search-input {
   width: 100%;
   padding: 12px 40px 12px 16px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--border-color, #e9ecef);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--bg-primary, white);
+  color: var(--text-primary, #333);
   transition: border-color 0.2s;
 }
 
@@ -525,10 +539,10 @@ defineExpose({
 .search-results {
   max-height: 300px;
   overflow-y: auto;
-  background: white;
-  border: 1px solid #e9ecef;
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #e9ecef);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
 }
 
 .search-result-item {
@@ -584,10 +598,10 @@ defineExpose({
 .no-results {
   padding: 16px;
   text-align: center;
-  background: white;
-  border: 1px solid #e9ecef;
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #e9ecef);
   border-radius: 8px;
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 14px;
 }
 
@@ -642,10 +656,10 @@ defineExpose({
 
 .control-btn {
   padding: 10px 18px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color, #dee2e6);
   border-radius: 8px;
-  background: white;
-  color: #495057;
+  background: var(--bg-primary, white);
+  color: var(--text-primary, #495057);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -732,9 +746,9 @@ defineExpose({
 
 .info-display {
   padding: 12px;
-  background: white;
+  background: var(--bg-primary, white);
   border-radius: 6px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color, #dee2e6);
 }
 
 .nearest-info {
@@ -798,9 +812,9 @@ defineExpose({
 
 .selected-station {
   padding: 12px;
-  background: #e3f2fd;
+  background: var(--bg-primary, #e3f2fd);
   border-radius: 6px;
-  border: 1px solid #bbdefb;
+  border: 1px solid var(--border-color, #bbdefb);
   text-align: center;
 }
 

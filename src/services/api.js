@@ -1,20 +1,31 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 async function request(endpoint, options = {}) {
-  const url = `${BASE_URL}${endpoint}`
+  const url = `${BASE_URL}/api/v1${endpoint}`
+  console.log('Making request to:', url)
   const config = {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   }
 
-  const response = await fetch(url, config)
-  if (!response.ok) {
-    const error = new Error(`API Error: ${response.status} ${response.statusText}`)
-    error.status = response.status
+  try {
+    const response = await fetch(url, config)
+    console.log('Response status:', response.status)
+    console.log('Response OK:', response.ok)
+    
+    if (!response.ok) {
+      const error = new Error(`API Error: ${response.status} ${response.statusText}`)
+      error.status = response.status
+      throw error
+    }
+    if (response.status === 204) return null
+    const data = await response.json()
+    console.log('Response data:', data)
+    return data
+  } catch (error) {
+    console.error('Network error:', error)
     throw error
   }
-  if (response.status === 204) return null
-  return response.json()
 }
 
 export function createService(resource) {

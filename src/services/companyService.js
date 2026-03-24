@@ -10,6 +10,6 @@ export const companyService = {
   },
 
   getWithRoutes(id) {
-    return service.getById(id, { _embed: 'routes' })
+    return service.getById(id, { _expand: 'routes' })
   },
 }

@@ -93,7 +93,10 @@ const fetchCompanies = async () => {
   isLoading.value = true
   error.value = null
   try {
-    expressCompanies.value = await companyService.getActive()
+    console.log('Fetching companies using service...')
+    const data = await companyService.getActive()
+    console.log('Companies data from service:', data)
+    expressCompanies.value = data
   } catch (e) {
     error.value = 'Failed to load companies. Please try again.'
     console.error('Error fetching companies:', e)

@@ -15,5 +15,5 @@ o
 
 
 ### BusMapFeature.vue
-- [ ] Make map container height responsive (400px mobile, 500px desktop)
-- [ ] Update control panel styling to match theme
+- [x] Make map container height responsive (400px mobile, 500px desktop)
+- [x] Update control panel styling to match theme
