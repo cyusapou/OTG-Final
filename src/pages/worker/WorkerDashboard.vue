@@ -10,7 +10,7 @@
       <div class="header-left">
         <div class="avatar">{{ initials }}</div>
         <div>
-          <h1 class="worker-name">{{ worker.firstName }} {{ worker.lastName }}</h1>
+          <h1 class="worker-name">{{ workerDisplayName }}</h1>
           <p class="company-label">{{ worker.companyName || 'On The Go' }}</p>
         </div>
       </div>
@@ -92,6 +92,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { workerService } from '../../services/workerService.js'
 import { scheduleService } from '../../services/scheduleService.js'
 import { routeService } from '../../services/routeService.js'
 import { busService } from '../../services/busService.js'
@@ -107,10 +108,19 @@ const loadingSchedules = ref(true)
 const clock = ref('')
 let clockTimer = null
 
+const workerDisplayName = computed(() => {
+  const w = worker.value
+  if (w.firstName && w.lastName) return `${w.firstName} ${w.lastName}`.trim()
+  return w.name || 'Worker'
+})
+
 const initials = computed(() => {
-  const f = worker.value.firstName?.[0] || ''
-  const l = worker.value.lastName?.[0] || ''
-  return (f + l).toUpperCase()
+  const w = worker.value
+  const f = w.firstName?.[0] || ''
+  const l = w.lastName?.[0] || ''
+  if (f || l) return (f + l).toUpperCase()
+  const n = w.name || ''
+  return n.slice(0, 2).toUpperCase() || 'W'
 })
 
 function updateClock() {
@@ -153,6 +163,7 @@ async function loadSchedules() {
     for (const id of assignedIds) {
       try {
         const schedule = await scheduleService.getDetailed(id)
+        if (schedule.date !== today) continue
         const [route, bus, bookings] = await Promise.all([
           routeService.getById(schedule.routeId),
           busService.getById(schedule.busId),
@@ -176,7 +187,7 @@ async function loadSchedules() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const raw = localStorage.getItem('workerSession')
   if (!raw) {
     router.replace('/worker/login')
@@ -185,6 +196,16 @@ onMounted(() => {
   worker.value = JSON.parse(raw)
   updateClock()
   clockTimer = setInterval(updateClock, 1000)
+  // Refetch worker so we have latest assignedScheduleIds after manager assigns trips
+  if (worker.value.id) {
+    try {
+      const fresh = await workerService.getById(worker.value.id)
+      if (fresh && Array.isArray(fresh.assignedScheduleIds)) {
+        worker.value.assignedScheduleIds = fresh.assignedScheduleIds
+        localStorage.setItem('workerSession', JSON.stringify(worker.value))
+      }
+    } catch { /* keep existing session */ }
+  }
   loadSchedules()
 })
 

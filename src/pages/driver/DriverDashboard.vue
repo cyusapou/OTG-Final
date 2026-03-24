@@ -1,16 +1,16 @@
 <template>
   <div class="driver-dashboard bg-white dark:bg-neutral-950 transition-colors">
     <div class="page-header">
-      <h2><i class="fas fa-car"></i> Good morning, {{ driver.firstName }}</h2>
+      <h2><i class="fas fa-car"></i> Good morning, {{ driverName }}</h2>
       <p class="subtitle">Here's your activity for today</p>
     </div>
 
     <!-- Stats -->
     <div class="stats-grid">
-      <StatsCard icon="fas fa-bus" label="Today's Trips" value="4" trend="2 completed" />
-      <StatsCard icon="fas fa-star" label="Rating" value="4.8" trend="Excellent" />
-      <StatsCard icon="fas fa-coins" label="Earnings Today" value="KES 3,240" trend="+12% vs avg" />
-      <StatsCard icon="fas fa-map-marker-alt" label="Distance Covered" value="245 km" trend="On track" />
+      <StatsCard icon="fas fa-bus" label="Today's Trips" :value="String(todayTrips.length)" :trend="todayTrips.length ? 'Assigned' : 'None'" />
+      <StatsCard icon="fas fa-star" label="Rating" value="—" trend="—" />
+      <StatsCard icon="fas fa-coins" label="Earnings Today" value="—" trend="—" />
+      <StatsCard icon="fas fa-map-marker-alt" label="Distance" value="—" trend="—" />
     </div>
 
     <!-- Status Toggle -->
@@ -28,26 +28,32 @@
       </div>
     </div>
 
-    <!-- Today's Trip -->
-    <div class="card trip-card" v-if="todayTrip">
-      <div class="trip-header">
-        <h3><i class="fas fa-rocket"></i> Current Trip</h3>
-        <span class="status-badge">In Progress</span>
-      </div>
-      <div class="trip-info">
-        <p><strong>Route:</strong> {{ todayTrip.routeName }}</p>
-        <p><strong>Departure:</strong> {{ todayTrip.departureTime }}</p>
-        <p><strong>Passengers:</strong> {{ todayTrip.passengerCount }} / 50</p>
-        <p><strong>Next Stop:</strong> Kigali Interchange - 15 km away</p>
-      </div>
-      <button
-        class="trip-action-btn"
-        :class="tripActive ? 'btn-end' : 'btn-start'"
-        @click="toggleTrip"
-      >
-        <i :class="tripActive ? 'fas fa-stop-circle' : 'fas fa-rocket'"></i> {{ tripActive ? 'End Trip' : 'Start Trip' }}
-      </button>
+    <!-- Loading trips -->
+    <div class="card" v-if="loadingTrips">
+      <p><i class="fas fa-spinner fa-spin"></i> Loading your trips…</p>
     </div>
+
+    <!-- Today's Trip(s) -->
+    <template v-else-if="todayTrips.length">
+      <div class="card trip-card" v-for="(trip, idx) in todayTrips" :key="trip.id">
+        <div class="trip-header">
+          <h3><i class="fas fa-rocket"></i> {{ todayTrips.length > 1 ? `Trip ${idx + 1}` : 'Current Trip' }}</h3>
+          <span class="status-badge">Scheduled</span>
+        </div>
+        <div class="trip-info">
+          <p><strong>Route:</strong> {{ trip.routeName }}</p>
+          <p><strong>Departure:</strong> {{ trip.departureTime }}</p>
+          <p><strong>Bus:</strong> {{ trip.busPlate || '—' }}</p>
+        </div>
+        <button
+          class="trip-action-btn"
+          :class="tripActive === trip.id ? 'btn-end' : 'btn-start'"
+          @click="toggleTrip(trip.id)"
+        >
+          <i :class="tripActive === trip.id ? 'fas fa-stop-circle' : 'fas fa-rocket'"></i> {{ tripActive === trip.id ? 'End Trip' : 'Start Trip' }}
+        </button>
+      </div>
+    </template>
 
     <div class="card" v-else>
       <p>No trip assigned for today.</p>
@@ -109,28 +115,89 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { store } from '../../store/index.js'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import StatsCard from '../../components/admin/StatsCard.vue'
+import { driverService } from '../../services/driverService.js'
+import { scheduleService } from '../../services/scheduleService.js'
+import { routeService } from '../../services/routeService.js'
 
+const router = useRouter()
 const driverStatus = ref('Online')
-const tripActive = ref(false)
+const tripActive = ref(null)
+const driver = ref({})
+const todayTrips = ref([])
+const loadingTrips = ref(true)
 
-const driver = computed(() => store.user || { firstName: 'Driver' })
-
-const todayTrip = ref({
-  routeName: 'Kigali - Muhanga',
-  departureTime: '08:00 AM',
-  passengerCount: 45,
+const driverName = computed(() => {
+  const d = driver.value
+  if (d.firstName && d.lastName) return `${d.firstName} ${d.lastName}`
+  return d.name || 'Driver'
 })
 
 function setStatus(status) {
   driverStatus.value = status
 }
 
-function toggleTrip() {
-  tripActive.value = !tripActive.value
+function toggleTrip(tripId) {
+  tripActive.value = tripActive.value === tripId ? null : tripId
 }
+
+function formatTime(timeStr) {
+  if (!timeStr) return '—'
+  if (timeStr.includes('T')) {
+    return new Date(timeStr).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  }
+  return timeStr
+}
+
+async function loadTrips() {
+  loadingTrips.value = true
+  todayTrips.value = []
+  try {
+    const ids = driver.value.assignedScheduleIds || []
+    const today = new Date().toISOString().split('T')[0]
+    for (const id of ids) {
+      try {
+        const schedule = await scheduleService.getDetailed(id)
+        if (schedule.date !== today) continue
+        const route = await routeService.getById(schedule.routeId).catch(() => null)
+        const routeName = route
+          ? `${route.origin || route.name || ''} → ${route.destination || ''}`.trim() || schedule.routeId
+          : schedule.routeId
+        todayTrips.value.push({
+          id: schedule.id,
+          routeName,
+          departureTime: formatTime(schedule.departureTime),
+          busPlate: schedule.busPlate || '—',
+        })
+      } catch { /* skip */ }
+    }
+  } catch {
+    todayTrips.value = []
+  } finally {
+    loadingTrips.value = false
+  }
+}
+
+onMounted(async () => {
+  const raw = localStorage.getItem('driverSession')
+  if (!raw) {
+    router.replace('/driver/login')
+    return
+  }
+  driver.value = JSON.parse(raw)
+  if (driver.value.id) {
+    try {
+      const fresh = await driverService.getById(driver.value.id)
+      if (fresh && Array.isArray(fresh.assignedScheduleIds)) {
+        driver.value.assignedScheduleIds = fresh.assignedScheduleIds
+        localStorage.setItem('driverSession', JSON.stringify(driver.value))
+      }
+    } catch { /* keep existing session */ }
+  }
+  loadTrips()
+})
 </script>
 
 <style scoped>
