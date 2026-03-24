@@ -12,9 +12,11 @@
       <div class="stop-info">
         <p class="stop-label">Your nearest boarding stop</p>
         <h3 class="stop-name">{{ stop.name }}</h3>
-        <p v-if="stop.area" class="stop-area">{{ stop.area }}</p>
-        <p class="stop-distance">{{ stop.distanceLabel }}</p>
-        <span v-if="stop.code" class="stop-code">Code: {{ stop.code }}</span>
+        <div class="stop-meta">
+          <p v-if="stop.area" class="stop-area">{{ stop.area }}</p>
+          <p class="stop-distance">{{ stop.distanceLabel }}</p>
+          <span v-if="stop.code" class="stop-code">Code: {{ stop.code }}</span>
+        </div>
       </div>
     </div>
 
@@ -28,7 +30,9 @@
       <div class="dest-icon"><i class="fas fa-crosshairs"></i></div>
       <div class="dest-details">
         <h3 class="dest-name">{{ destination.name }}</h3>
-        <span v-if="destination.code" class="dest-code">Code: {{ destination.code }}</span>
+        <div class="dest-meta">
+          <span v-if="destination.code" class="dest-code">Code: {{ destination.code }}</span>
+        </div>
       </div>
     </div>
 
@@ -89,9 +93,10 @@ defineEmits(['confirm', 'change'])
 
 @media (min-width: 768px) {
   .nearest-stop-card {
-    max-width: 600px;
+    max-width: 800px;
     margin: 16px auto 0;
-    padding: 16px;
+    padding: 20px;
+    width: 100%;
   }
 }
 
@@ -112,14 +117,14 @@ defineEmits(['confirm', 'change'])
 .stop-main {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 @media (min-width: 768px) {
   .stop-main {
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 }
 
@@ -205,11 +210,18 @@ defineEmits(['confirm', 'change'])
 .destination-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
   background: var(--bg-secondary);
   border-radius: 10px;
   margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .destination-info {
+    gap: 20px;
+    padding: 20px;
+  }
 }
 
 .dest-icon {
@@ -263,16 +275,27 @@ defineEmits(['confirm', 'change'])
 .alt-list {
   list-style: none;
   margin: 8px 0 0 0;
-  padding: 8px 8px;
+  padding: 12px;
   background: var(--bg-secondary);
   border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .alt-list {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+    padding: 16px;
+  }
 }
 
 .alt-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
   border-bottom: 1px solid var(--border-color);
 }
 
